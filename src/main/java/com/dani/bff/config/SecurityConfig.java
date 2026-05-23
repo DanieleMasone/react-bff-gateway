@@ -22,7 +22,6 @@ import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.oauth2.jwt.JwtValidators;
 import org.springframework.security.oauth2.jwt.NimbusReactiveJwtDecoder;
 import org.springframework.security.oauth2.jwt.ReactiveJwtDecoder;
-import org.springframework.security.oauth2.jwt.ReactiveJwtDecoders;
 import org.springframework.security.web.server.SecurityWebFilterChain;
 import org.springframework.security.web.server.ServerAuthenticationEntryPoint;
 import org.springframework.security.web.server.authorization.ServerAccessDeniedHandler;
@@ -60,21 +59,18 @@ public class SecurityConfig {
     }
 
     /**
-     * Builds a JWT decoder from production JWK settings when present, otherwise from a local HMAC secret.
+     * Builds a JWT decoder from JWK, issuer discovery, or local HMAC settings in that order.
      *
      * @param properties externalized JWT settings
      * @return a reactive JWT decoder used by the resource server
      */
     @Bean
     public ReactiveJwtDecoder reactiveJwtDecoder(JwtSecurityProperties properties) {
-        if (StringUtils.hasText(properties.getIssuerUri()) && !StringUtils.hasText(properties.getJwkSetUri())
-                && !StringUtils.hasText(properties.getSecret())) {
-            return ReactiveJwtDecoders.fromIssuerLocation(properties.getIssuerUri());
-        }
-
         NimbusReactiveJwtDecoder decoder;
         if (StringUtils.hasText(properties.getJwkSetUri())) {
             decoder = NimbusReactiveJwtDecoder.withJwkSetUri(properties.getJwkSetUri()).build();
+        } else if (StringUtils.hasText(properties.getIssuerUri())) {
+            decoder = NimbusReactiveJwtDecoder.withIssuerLocation(properties.getIssuerUri()).build();
         } else if (StringUtils.hasText(properties.getSecret())) {
             decoder = NimbusReactiveJwtDecoder.withSecretKey(secretKey(properties.getSecret()))
                     .macAlgorithm(MacAlgorithm.HS256)
@@ -96,8 +92,11 @@ public class SecurityConfig {
     }
 
     private static OAuth2TokenValidator<Jwt> jwtValidator(JwtSecurityProperties properties) {
-        OAuth2TokenValidator<Jwt> defaultValidator = StringUtils.hasText(properties.getIssuer())
-                ? JwtValidators.createDefaultWithIssuer(properties.getIssuer())
+        String expectedIssuer = StringUtils.hasText(properties.getIssuer())
+                ? properties.getIssuer()
+                : properties.getIssuerUri();
+        OAuth2TokenValidator<Jwt> defaultValidator = StringUtils.hasText(expectedIssuer)
+                ? JwtValidators.createDefaultWithIssuer(expectedIssuer)
                 : JwtValidators.createDefault();
 
         if (!StringUtils.hasText(properties.getAudience())) {

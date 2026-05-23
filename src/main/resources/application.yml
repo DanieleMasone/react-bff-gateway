@@ -9,7 +9,7 @@ security:
   jwt:
     issuer-uri: ${BFF_JWT_ISSUER_URI:}
     jwk-set-uri: ${BFF_JWT_JWK_SET_URI:}
-    issuer: ${BFF_JWT_ISSUER:react-bff-gateway-local}
+    issuer: ${BFF_JWT_ISSUER:}
     audience: ${BFF_JWT_AUDIENCE:react-dashboard}
     secret: ${BFF_JWT_SECRET:local-development-secret-change-me-at-least-32-bytes}
 

@@ -71,6 +71,16 @@ class SecurityConfigTest {
     }
 
     @Test
+    void issuerUriTakesPrecedenceOverLocalSecretDefault() {
+        JwtSecurityProperties properties = new JwtSecurityProperties();
+        properties.setIssuerUri("http://localhost:9000/issuer");
+        properties.setSecret(SECRET);
+        properties.setAudience("react-dashboard");
+
+        assertThat(securityConfig.reactiveJwtDecoder(properties)).isNotNull();
+    }
+
+    @Test
     void shortHmacSecretIsRejected() {
         JwtSecurityProperties properties = new JwtSecurityProperties();
         properties.setSecret("short");

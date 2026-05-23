@@ -1,25 +1,25 @@
 # React BFF Gateway
 
-A production-oriented Backend for Frontend (BFF) for a React application, built with Java 21, Spring Boot WebFlux, WebClient, JWT Resource Server security, Resilience4j, Docker, JaCoCo, Javadoc, and GitHub Pages publishing.
+Production-oriented Backend for Frontend (BFF) for a React dashboard, built with Java 21, Spring Boot WebFlux, WebClient, JWT Resource Server security, Resilience4j, Docker, JaCoCo, Javadoc, GitHub Actions, and GitHub Pages.
 
-The project demonstrates how a React frontend can talk to one stable API while the BFF handles downstream aggregation, security, error shaping, resilience, and operational concerns.
+The project gives a React frontend one stable API while the BFF owns authentication, downstream aggregation, response adaptation, resilience, and operational concerns.
 
 ## Architecture
 
-```text
-React App
-  |
-  | HTTP / JSON + Bearer JWT
-  v
-React BFF Gateway
-  |
-  | WebClient
-  +--> User Service
-  |
-  +--> Product Service
+```mermaid
+flowchart LR
+    react["React frontend"] -->|"GET /api/dashboard\nBearer JWT"| security["Spring Security\nJWT Resource Server"]
+    security --> api["Dashboard API\nstable React DTOs"]
+    api --> service["Dashboard aggregation service"]
+    service --> breaker["Resilience4j\ncircuit breakers"]
+    breaker -->|"WebClient"| user["User service\nprofile data"]
+    breaker -->|"WebClient"| product["Product service\nrecommendations"]
+    breaker -. "fallback profile" .-> api
+    breaker -. "empty recommendations" .-> api
+    actuator["Actuator health"] -. "public health only" .-> security
 ```
 
-The BFF is a single Spring Boot application. It exposes frontend-oriented DTOs and hides downstream response shapes, latency, failures, and service locations from the React app.
+The BFF is a single deployable Spring Boot application. It hides downstream response shapes and service locations from the frontend, then returns immutable Java record DTOs optimized for the React dashboard.
 
 ## Main Endpoint
 
@@ -47,20 +47,45 @@ Example response:
 }
 ```
 
+## Request Flow
+
+1. The React app calls `/api/dashboard` with a Bearer JWT.
+2. Spring Security validates the token before the controller runs.
+3. `DashboardService` extracts the JWT subject as the dashboard user id.
+4. `ResilientDashboardGateway` calls user and product downstream services through `WebClient`.
+5. Downstream contracts are mapped to stable BFF DTOs.
+6. If a downstream service fails, Resilience4j returns a stable fallback response shape.
+
+## Security Flow
+
+- `/api/**` requires a valid JWT.
+- `/actuator/health` and `/actuator/health/**` are public.
+- Every other route is denied by default.
+- Authentication and access-denied responses are JSON `ApiError` payloads.
+- Tests use Spring Security mock JWT support and do not require a real identity provider.
+- Local development uses HS256 for convenience; production-style deployments should use `BFF_JWT_JWK_SET_URI` or `BFF_JWT_ISSUER_URI`.
+
+## Resilience Flow
+
+- User service failure returns `Guest User` with the authenticated subject id.
+- Product service failure returns an empty recommendation list.
+- Circuit breakers are registered with Actuator health.
+- The frontend receives a valid dashboard response even when one or both downstreams fail.
+
 ## Tech Stack
 
 - Java 21
-- Maven
-- Spring Boot WebFlux
-- WebClient
+- Maven Wrapper
+- Spring Boot WebFlux and WebClient
 - Spring Security OAuth2 Resource Server / JWT
 - Resilience4j circuit breakers
 - Spring Boot Actuator
 - JUnit 5, Spring Boot Test, WebTestClient, Reactor Test
 - MockWebServer for downstream HTTP simulation
-- ArchUnit for architecture rules
+- WireMock for Docker-local downstream services
+- ArchUnit for package boundary rules
 - JaCoCo coverage reports and coverage checks
-- Javadoc with Java 21
+- Javadoc with Java 21 doclint
 - Docker and Docker Compose
 - GitHub Actions and GitHub Pages
 
@@ -74,15 +99,20 @@ src/main/java/com/dani/bff
 |-- error     structured API errors and exception handling
 |-- gateway   downstream WebClient clients and resilience boundary
 `-- service   dashboard aggregation orchestration
+
+.github/pages/index.html      GitHub Pages landing page template
+.github/workflows/ci.yml      CI, artifact publishing, and Pages deployment
+docker/wiremock               Local mock user and product services
+scripts/create-local-jwt.ps1  Local HS256 JWT helper
 ```
 
-## Local Development From IntelliJ
+## Run From IntelliJ
 
 1. Install JDK 21.
 2. Import the repository as a Maven project.
 3. Create a Spring Boot run configuration for `ReactBffGatewayApplication`.
-4. Set active profile to `local`.
-5. Start mock downstream services, or point the app at real local services:
+4. Set the active profile to `local`.
+5. Start mock downstream services:
 
 ```powershell
 docker compose up user-service product-service
@@ -103,9 +133,15 @@ Invoke-WebRequest `
   http://localhost:8080/api/dashboard
 ```
 
-## Docker Local Runtime
+## Docker Runtime
 
-The Compose stack starts the BFF plus two WireMock downstream services.
+The Compose stack starts:
+
+- BFF on `http://localhost:8080`
+- WireMock user service on `http://localhost:8081`
+- WireMock product service on `http://localhost:8082`
+
+Start everything:
 
 ```bash
 docker compose up --build
@@ -124,44 +160,27 @@ Stop the stack:
 docker compose down
 ```
 
-The mock services are available on:
+Mock downstream endpoints:
 
-- User service: `http://localhost:8081/users/user-123`
-- Product service: `http://localhost:8082/users/user-123/recommendations`
+- `GET http://localhost:8081/users/user-123`
+- `GET http://localhost:8082/users/user-123/recommendations`
 
 ## Configuration
-
-Important environment variables:
 
 | Variable | Purpose | Default |
 | --- | --- | --- |
 | `SERVER_PORT` | BFF HTTP port | `8080` |
 | `USER_SERVICE_BASE_URL` | User service base URL | `http://localhost:8081` |
 | `PRODUCT_SERVICE_BASE_URL` | Product service base URL | `http://localhost:8082` |
-| `BFF_JWT_ISSUER_URI` | OIDC issuer discovery URL for production-style validation | empty |
-| `BFF_JWT_JWK_SET_URI` | JWK set URL for production-style validation | empty |
-| `BFF_JWT_SECRET` | Local HS256 secret when no JWK settings are supplied | local development secret |
-| `BFF_JWT_ISSUER` | Expected JWT issuer for local/JWK validation | `react-bff-gateway-local` |
+| `USER_SERVICE_TIMEOUT` | User service timeout | `2s` |
+| `PRODUCT_SERVICE_TIMEOUT` | Product service timeout | `2s` |
+| `BFF_JWT_JWK_SET_URI` | JWK set URL for production-style JWT validation | empty |
+| `BFF_JWT_ISSUER_URI` | OIDC issuer discovery URL for production-style JWT validation | empty |
+| `BFF_JWT_SECRET` | Local HS256 secret when no JWK or issuer URI is supplied | local development secret |
+| `BFF_JWT_ISSUER` | Optional expected JWT issuer | empty, set in Docker Compose |
 | `BFF_JWT_AUDIENCE` | Expected JWT audience | `react-dashboard` |
 
-For production, prefer `BFF_JWT_JWK_SET_URI` or `BFF_JWT_ISSUER_URI` and avoid the local shared secret.
-
-## Security Model
-
-- `/api/**` requires a valid Bearer JWT.
-- `/actuator/health` and `/actuator/health/**` are public for container and platform health checks.
-- All other routes are denied by default.
-- Authentication and access-denied responses use a structured JSON error body.
-- Tests use Spring Security's mock JWT support and do not require a real identity provider.
-
-## Resilience Model
-
-The dashboard aggregation uses Resilience4j circuit breakers around the user and product downstream calls.
-
-- User service failure returns a safe placeholder profile for the authenticated subject.
-- Product service failure returns an empty recommendations list.
-- The frontend receives a stable response shape even when one or more downstream services fail.
-- Circuit breaker health and events are configured for Actuator, while default HTTP security still only permits health publicly.
+Decoder precedence is `BFF_JWT_JWK_SET_URI`, then `BFF_JWT_ISSUER_URI`, then local `BFF_JWT_SECRET`.
 
 ## Observability
 
@@ -173,7 +192,7 @@ Configured Actuator endpoints:
 - `/actuator/circuitbreakers`
 - `/actuator/circuitbreakerevents`
 
-Only health is publicly accessible by default. That keeps the repository aligned with a deny-by-default security posture while leaving operational endpoints configured for environments that choose to expose them behind stronger controls.
+Only health is public by default. Other configured endpoints remain behind the deny-by-default security policy unless the security model is intentionally changed.
 
 ## Tests
 
@@ -183,39 +202,36 @@ Run the full verification build:
 ./mvnw clean verify
 ```
 
-The test suite covers:
+The suite covers:
 
-- dashboard security behavior
-- unauthenticated access rejection
-- actuator health accessibility
+- authenticated dashboard access
+- unauthenticated dashboard rejection
+- public health endpoint access
+- denied-by-default behavior
 - dashboard aggregation
-- downstream client success and failure scenarios
-- circuit-breaker fallback and open-state behavior
+- user and product downstream success
+- downstream failure fallbacks
+- circuit breaker open-state behavior
 - DTO serialization/deserialization
-- package boundary rules with ArchUnit
+- structured error responses
+- package boundaries with ArchUnit
 
-Testcontainers is intentionally not used because the project has no database, broker, or external runtime dependency where containers would add meaningful signal. MockWebServer and WireMock cover the HTTP boundary with less moving machinery.
+Testcontainers is intentionally not used because this project has no database, broker, or containerized external runtime where it would add useful signal. MockWebServer and WireMock cover the HTTP boundaries directly.
 
 ## Coverage
 
-JaCoCo is configured in Maven and runs during `verify`.
-
-```bash
-./mvnw clean verify
-```
-
-Open the generated report:
+JaCoCo runs during `verify` and writes HTML to:
 
 ```text
 target/site/jacoco/index.html
 ```
 
-The build fails if bundle coverage drops below the configured thresholds:
+Current bundle gates:
 
 - instruction coverage: 70%
 - branch coverage: 50%
 
-Generated coverage output is ignored and should not be committed.
+Generated coverage artifacts are ignored and must not be committed.
 
 ## Javadoc
 
@@ -231,41 +247,36 @@ Open:
 target/site/apidocs/index.html
 ```
 
-The Maven Javadoc plugin is configured for Java 21 with doclint enabled except for missing-comment enforcement. Generated Javadoc output is ignored and should not be committed.
+Javadoc uses Java 21, English comments, and doclint with missing-comment enforcement disabled. Generated Javadoc artifacts are ignored and must not be committed.
 
 ## CI/CD
 
-The GitHub Actions workflow in `.github/workflows/ci.yml` runs on:
-
-- pushes to `main`
-- pull requests
+`.github/workflows/ci.yml` runs on pushes to `main` and on pull requests.
 
 The workflow:
 
-- sets up Java 21 with Maven dependency caching
-- runs `validate`
-- runs `verify`, including tests, package, JaCoCo report generation, and coverage checks
+- checks out the repository with `actions/checkout`
+- sets up Java 21 with `actions/setup-java` and Maven caching
+- runs Maven `validate`
+- runs `verify`, including tests, packaging, JaCoCo report generation, and coverage checks
 - generates Javadoc
-- uploads test reports when a build fails
+- uploads test reports on failure
 - uploads JaCoCo HTML as an artifact
-- uploads generated Javadoc as an artifact
-- prepares a static GitHub Pages site from generated artifacts
-- deploys GitHub Pages only for successful pushes to `main`
+- uploads Javadoc as an artifact
+- assembles GitHub Pages content from generated reports and `.github/pages/index.html`
+- deploys Pages only after successful pushes to `main`
 
 ## GitHub Pages
 
-The Pages site is generated during CI rather than committed. It includes:
+The Pages site is generated during CI instead of committing generated static reports.
 
-- project overview
-- generated Javadoc
-- generated JaCoCo coverage report
-- link back to the GitHub repository
+It includes:
 
-The workflow uses the current GitHub Pages actions:
-
-- `actions/configure-pages`
-- `actions/upload-pages-artifact`
-- `actions/deploy-pages`
+- portfolio-grade project overview
+- accessible architecture diagram
+- local development and Docker instructions
+- testing, coverage, and documentation summary
+- links to the GitHub repository, Actions workflow, generated Javadoc, and JaCoCo coverage
 
 Repository Pages settings should use GitHub Actions as the Pages source.
 
@@ -273,11 +284,11 @@ Repository Pages settings should use GitHub Actions as the Pages source.
 
 ### Why a BFF
 
-A BFF gives the React app a stable, frontend-oriented API and keeps backend topology, failure handling, and service-specific contracts out of the browser.
+A BFF gives the React app a stable, frontend-oriented API and keeps backend topology, failure handling, and service-specific contracts out of browser code.
 
 ### Why WebClient
 
-WebClient is a good fit for concurrent downstream HTTP calls. The application exposes a reactive WebFlux API without forcing unnecessary domain complexity.
+WebClient supports non-blocking downstream HTTP composition without forcing unnecessary domain complexity.
 
 ### Why Records
 
@@ -285,8 +296,20 @@ DTOs are Java records to keep response contracts immutable, concise, and seriali
 
 ### Why One Deployable
 
-The project is intentionally a single deployable gateway. Splitting it into more services would add operational cost without improving the portfolio value of the example.
+The project is intentionally one deployable gateway. Splitting it into more services would add operational cost without improving the example.
 
 ### Why No Lombok
 
-The codebase uses Java records and explicit constructors instead of Lombok to keep the build simple and transparent.
+Java records and explicit configuration classes keep the build transparent without Lombok.
+
+## What This Repository Demonstrates
+
+- Backend for Frontend pattern for React applications
+- JWT-secured API boundary
+- WebClient-based downstream aggregation
+- Resilience4j fallbacks with stable frontend contracts
+- Structured API errors
+- Docker-local development with mock downstream services
+- Meaningful automated tests and architecture rules
+- CI-generated coverage and Javadoc
+- GitHub Pages documentation assembled from CI artifacts

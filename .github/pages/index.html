@@ -1,0 +1,712 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light dark">
+  <title>React BFF Gateway</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --bg: #f7f8fb;
+      --surface: #ffffff;
+      --surface-strong: #eef2f7;
+      --text: #172033;
+      --muted: #5b677a;
+      --border: #d7dee9;
+      --accent: #0f766e;
+      --accent-strong: #115e59;
+      --accent-soft: #d9f3ef;
+      --code-bg: #e9edf5;
+      --shadow: 0 18px 44px rgba(20, 32, 51, 0.08);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      line-height: 1.5;
+    }
+
+    :root[data-theme="dark"] {
+      color-scheme: dark;
+      --bg: #0f172a;
+      --surface: #172033;
+      --surface-strong: #202b43;
+      --text: #edf3fb;
+      --muted: #abb8ca;
+      --border: #33415c;
+      --accent: #5eead4;
+      --accent-strong: #99f6e4;
+      --accent-soft: #123b3a;
+      --code-bg: #25324b;
+      --shadow: 0 18px 44px rgba(0, 0, 0, 0.28);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      margin: 0;
+      min-width: 320px;
+      color: var(--text);
+      background: var(--bg);
+    }
+
+    a {
+      color: var(--accent-strong);
+    }
+
+    a:focus-visible,
+    button:focus-visible {
+      outline: 3px solid var(--accent);
+      outline-offset: 3px;
+    }
+
+    .skip-link {
+      position: absolute;
+      left: 16px;
+      top: 12px;
+      z-index: 20;
+      transform: translateY(-150%);
+      padding: 10px 14px;
+      border-radius: 6px;
+      color: var(--text);
+      background: var(--surface);
+      box-shadow: var(--shadow);
+      transition: transform 160ms ease;
+    }
+
+    .skip-link:focus {
+      transform: translateY(0);
+    }
+
+    .page-header {
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      border-bottom: 1px solid var(--border);
+      background: color-mix(in srgb, var(--surface) 92%, transparent);
+      backdrop-filter: blur(16px);
+    }
+
+    .nav {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 20px;
+      max-width: 1160px;
+      margin: 0 auto;
+      padding: 14px 24px;
+    }
+
+    .brand {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      color: var(--text);
+      font-weight: 700;
+      text-decoration: none;
+    }
+
+    .brand-mark {
+      display: inline-grid;
+      width: 32px;
+      height: 32px;
+      place-items: center;
+      border-radius: 8px;
+      color: #ffffff;
+      background: var(--accent-strong);
+      font-size: 0.9rem;
+    }
+
+    .nav-links {
+      display: flex;
+      align-items: center;
+      gap: 18px;
+      font-size: 0.95rem;
+    }
+
+    .nav-links a {
+      color: var(--muted);
+      text-decoration: none;
+    }
+
+    .nav-links a:hover {
+      color: var(--text);
+    }
+
+    .theme-toggle {
+      display: inline-flex;
+      min-height: 38px;
+      align-items: center;
+      gap: 8px;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 8px 12px;
+      color: var(--text);
+      background: var(--surface);
+      cursor: pointer;
+      font: inherit;
+    }
+
+    main {
+      max-width: 1160px;
+      margin: 0 auto;
+      padding: 56px 24px 72px;
+    }
+
+    .hero {
+      display: grid;
+      grid-template-columns: minmax(0, 1.05fr) minmax(320px, 0.95fr);
+      gap: 36px;
+      align-items: center;
+    }
+
+    .eyebrow {
+      margin: 0 0 12px;
+      color: var(--accent-strong);
+      font-size: 0.88rem;
+      font-weight: 700;
+      text-transform: uppercase;
+    }
+
+    h1,
+    h2,
+    h3 {
+      margin: 0;
+      line-height: 1.15;
+    }
+
+    h1 {
+      max-width: 760px;
+      font-size: clamp(2.4rem, 5vw, 4.8rem);
+    }
+
+    h2 {
+      font-size: clamp(1.65rem, 3vw, 2.4rem);
+    }
+
+    h3 {
+      font-size: 1.05rem;
+    }
+
+    .lede {
+      max-width: 720px;
+      margin: 22px 0 0;
+      color: var(--muted);
+      font-size: 1.15rem;
+    }
+
+    .hero-actions,
+    .quick-links {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-top: 28px;
+    }
+
+    .button {
+      display: inline-flex;
+      min-height: 42px;
+      align-items: center;
+      justify-content: center;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 10px 14px;
+      color: var(--text);
+      background: var(--surface);
+      font-weight: 650;
+      text-decoration: none;
+    }
+
+    .button.primary {
+      border-color: var(--accent-strong);
+      color: #ffffff;
+      background: var(--accent-strong);
+    }
+
+    :root[data-theme="dark"] .button.primary {
+      color: #062220;
+      background: var(--accent);
+    }
+
+    .button:hover {
+      border-color: var(--accent);
+    }
+
+    .panel {
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 22px;
+      background: var(--surface);
+      box-shadow: var(--shadow);
+    }
+
+    .signal-grid,
+    .quality-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 14px;
+      margin-top: 24px;
+    }
+
+    .signal,
+    .quality-card {
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 18px;
+      background: var(--surface);
+    }
+
+    .signal strong,
+    .quality-card strong {
+      display: block;
+      margin-bottom: 6px;
+    }
+
+    .signal span,
+    .quality-card span {
+      color: var(--muted);
+      font-size: 0.95rem;
+    }
+
+    section {
+      margin-top: 72px;
+    }
+
+    .section-heading {
+      display: flex;
+      align-items: end;
+      justify-content: space-between;
+      gap: 24px;
+      margin-bottom: 24px;
+    }
+
+    .section-heading p {
+      max-width: 560px;
+      margin: 0;
+      color: var(--muted);
+    }
+
+    .diagram-wrap {
+      overflow-x: auto;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      background: var(--surface);
+      box-shadow: var(--shadow);
+    }
+
+    .architecture-svg {
+      display: block;
+      width: 100%;
+      min-width: 760px;
+      height: auto;
+    }
+
+    .box {
+      fill: var(--surface-strong);
+      stroke: var(--border);
+      stroke-width: 1.4;
+    }
+
+    .box-accent {
+      fill: var(--accent-soft);
+      stroke: var(--accent);
+      stroke-width: 1.6;
+    }
+
+    .diagram-text {
+      fill: var(--text);
+      font-size: 15px;
+      font-weight: 700;
+    }
+
+    .diagram-muted {
+      fill: var(--muted);
+      font-size: 12px;
+      font-weight: 500;
+    }
+
+    .arrow {
+      fill: none;
+      stroke: var(--accent-strong);
+      stroke-width: 2.2;
+      marker-end: url("#arrowhead");
+    }
+
+    .flow-grid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 14px;
+      counter-reset: flow;
+    }
+
+    .flow-step {
+      position: relative;
+      min-height: 168px;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 18px;
+      background: var(--surface);
+    }
+
+    .flow-step::before {
+      counter-increment: flow;
+      content: counter(flow);
+      display: grid;
+      width: 28px;
+      height: 28px;
+      margin-bottom: 14px;
+      place-items: center;
+      border-radius: 50%;
+      color: #ffffff;
+      background: var(--accent-strong);
+      font-size: 0.85rem;
+      font-weight: 800;
+    }
+
+    :root[data-theme="dark"] .flow-step::before {
+      color: #062220;
+      background: var(--accent);
+    }
+
+    .flow-step p,
+    .quality-card p {
+      margin: 8px 0 0;
+      color: var(--muted);
+      font-size: 0.96rem;
+    }
+
+    .code-block {
+      overflow-x: auto;
+      border-radius: 8px;
+      padding: 16px;
+      background: var(--code-bg);
+      color: var(--text);
+      font-size: 0.92rem;
+    }
+
+    .two-column {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+      gap: 18px;
+    }
+
+    .footer {
+      border-top: 1px solid var(--border);
+      color: var(--muted);
+      background: var(--surface);
+    }
+
+    .footer-inner {
+      max-width: 1160px;
+      margin: 0 auto;
+      padding: 24px;
+      font-size: 0.95rem;
+    }
+
+    @media (max-width: 920px) {
+      .hero,
+      .two-column {
+        grid-template-columns: 1fr;
+      }
+
+      .signal-grid,
+      .quality-grid,
+      .flow-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .nav {
+        align-items: flex-start;
+      }
+
+      .nav-links {
+        display: none;
+      }
+    }
+
+    @media (max-width: 640px) {
+      main {
+        padding: 38px 18px 56px;
+      }
+
+      .signal-grid,
+      .quality-grid,
+      .flow-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .theme-toggle {
+        min-width: 44px;
+      }
+
+      .theme-label {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        overflow: hidden;
+        clip: rect(0, 0, 0, 0);
+      }
+    }
+  </style>
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to content</a>
+  <header class="page-header">
+    <nav class="nav" aria-label="Primary navigation">
+      <a class="brand" href="#main" aria-label="React BFF Gateway home">
+        <span class="brand-mark" aria-hidden="true">BFF</span>
+        <span>React BFF Gateway</span>
+      </a>
+      <div class="nav-links" aria-label="Page sections">
+        <a href="#architecture">Architecture</a>
+        <a href="#run">Run Locally</a>
+        <a href="#quality">Quality</a>
+        <a href="#resources">Resources</a>
+      </div>
+      <button class="theme-toggle" id="theme-toggle" type="button" aria-label="Switch color theme" aria-pressed="false">
+        <span id="theme-icon" aria-hidden="true">Dark</span>
+        <span class="theme-label">Theme</span>
+      </button>
+    </nav>
+  </header>
+
+  <main id="main">
+    <section class="hero" aria-labelledby="hero-title">
+      <div>
+        <p class="eyebrow">Spring Boot Backend for Frontend</p>
+        <h1 id="hero-title">A production-minded gateway for React dashboards.</h1>
+        <p class="lede">
+          This portfolio project centralizes JWT security, aggregates user and product APIs,
+          applies Resilience4j fallbacks, and publishes generated quality documentation from CI.
+        </p>
+        <div class="hero-actions" aria-label="Primary resources">
+          <a class="button primary" href="https://github.com/__REPOSITORY__">View Repository</a>
+          <a class="button" href="./javadoc/">Javadoc</a>
+          <a class="button" href="./coverage/">Coverage</a>
+          <a class="button" href="https://github.com/__REPOSITORY__/actions/workflows/ci.yml">CI Workflow</a>
+        </div>
+      </div>
+      <aside class="panel" aria-label="Project signals">
+        <h2>Repository Signals</h2>
+        <div class="signal-grid">
+          <div class="signal">
+            <strong>Java 21</strong>
+            <span>Spring Boot WebFlux application.</span>
+          </div>
+          <div class="signal">
+            <strong>JWT</strong>
+            <span>Resource Server with local HMAC option.</span>
+          </div>
+          <div class="signal">
+            <strong>Resilience</strong>
+            <span>Circuit breakers and stable fallbacks.</span>
+          </div>
+          <div class="signal">
+            <strong>Docker</strong>
+            <span>BFF plus WireMock downstreams.</span>
+          </div>
+          <div class="signal">
+            <strong>JaCoCo</strong>
+            <span>Coverage report and build gates.</span>
+          </div>
+          <div class="signal">
+            <strong>Javadoc</strong>
+            <span>Generated API docs published from CI.</span>
+          </div>
+        </div>
+      </aside>
+    </section>
+
+    <section id="architecture" aria-labelledby="architecture-title">
+      <div class="section-heading">
+        <div>
+          <p class="eyebrow">Architecture</p>
+          <h2 id="architecture-title">Request path and resilience boundary</h2>
+        </div>
+        <p>The React client sees one stable dashboard API while the BFF hides downstream contracts and failures.</p>
+      </div>
+
+      <div class="diagram-wrap" role="img" aria-labelledby="diagram-title diagram-desc">
+        <svg class="architecture-svg" viewBox="0 0 1040 520" xmlns="http://www.w3.org/2000/svg">
+          <title id="diagram-title">React BFF Gateway architecture</title>
+          <desc id="diagram-desc">
+            React sends a JWT-authenticated request to the Spring Boot BFF.
+            The security boundary validates the token, the dashboard aggregation calls user and product services through WebClient,
+            and Resilience4j circuit breakers provide fallbacks. CI publishes generated Javadoc and JaCoCo documentation.
+          </desc>
+          <defs>
+            <marker id="arrowhead" markerWidth="10" markerHeight="10" refX="7" refY="3" orient="auto">
+              <path d="M0,0 L0,6 L8,3 z" fill="var(--accent-strong)"></path>
+            </marker>
+          </defs>
+
+          <rect class="box" x="32" y="76" width="180" height="92" rx="8"></rect>
+          <text class="diagram-text" x="122" y="113" text-anchor="middle">React Frontend</text>
+          <text class="diagram-muted" x="122" y="139" text-anchor="middle">GET /api/dashboard</text>
+
+          <rect class="box-accent" x="298" y="48" width="420" height="300" rx="8"></rect>
+          <text class="diagram-text" x="508" y="88" text-anchor="middle">Spring Boot BFF Gateway</text>
+
+          <rect class="box" x="330" y="116" width="156" height="74" rx="8"></rect>
+          <text class="diagram-text" x="408" y="147" text-anchor="middle">JWT Security</text>
+          <text class="diagram-muted" x="408" y="169" text-anchor="middle">Resource Server</text>
+
+          <rect class="box" x="532" y="116" width="154" height="74" rx="8"></rect>
+          <text class="diagram-text" x="609" y="147" text-anchor="middle">Dashboard API</text>
+          <text class="diagram-muted" x="609" y="169" text-anchor="middle">Stable DTOs</text>
+
+          <rect class="box" x="330" y="236" width="356" height="76" rx="8"></rect>
+          <text class="diagram-text" x="508" y="267" text-anchor="middle">Resilience4j Boundary</text>
+          <text class="diagram-muted" x="508" y="290" text-anchor="middle">Circuit breakers and fallback responses</text>
+
+          <rect class="box" x="810" y="88" width="190" height="84" rx="8"></rect>
+          <text class="diagram-text" x="905" y="122" text-anchor="middle">User Service</text>
+          <text class="diagram-muted" x="905" y="146" text-anchor="middle">Profile data</text>
+
+          <rect class="box" x="810" y="234" width="190" height="84" rx="8"></rect>
+          <text class="diagram-text" x="905" y="268" text-anchor="middle">Product Service</text>
+          <text class="diagram-muted" x="905" y="292" text-anchor="middle">Recommendations</text>
+
+          <rect class="box" x="286" y="402" width="464" height="72" rx="8"></rect>
+          <text class="diagram-text" x="518" y="431" text-anchor="middle">CI Quality Outputs</text>
+          <text class="diagram-muted" x="518" y="454" text-anchor="middle">Tests, JaCoCo coverage, Javadoc, GitHub Pages</text>
+
+          <path class="arrow" d="M212 122 H330"></path>
+          <text class="diagram-muted" x="262" y="105" text-anchor="middle">Bearer JWT</text>
+          <path class="arrow" d="M486 153 H532"></path>
+          <path class="arrow" d="M609 190 V236"></path>
+          <path class="arrow" d="M686 255 C746 232 758 132 810 130"></path>
+          <text class="diagram-muted" x="758" y="117" text-anchor="middle">WebClient</text>
+          <path class="arrow" d="M686 288 C746 310 758 278 810 276"></path>
+          <text class="diagram-muted" x="762" y="305" text-anchor="middle">WebClient</text>
+          <path class="arrow" d="M508 348 V402"></path>
+          <path class="arrow" d="M330 276 C246 278 220 168 180 162"></path>
+          <text class="diagram-muted" x="266" y="235" text-anchor="middle">Stable JSON</text>
+        </svg>
+      </div>
+    </section>
+
+    <section aria-labelledby="flow-title">
+      <div class="section-heading">
+        <div>
+          <p class="eyebrow">Runtime Flow</p>
+          <h2 id="flow-title">How a dashboard request is handled</h2>
+        </div>
+      </div>
+      <div class="flow-grid">
+        <article class="flow-step">
+          <h3>Authenticate</h3>
+          <p>The BFF validates a Bearer JWT before any `/api/**` request reaches the controller.</p>
+        </article>
+        <article class="flow-step">
+          <h3>Aggregate</h3>
+          <p>The dashboard service reads the JWT subject and starts user and product calls.</p>
+        </article>
+        <article class="flow-step">
+          <h3>Protect</h3>
+          <p>Resilience4j circuit breakers isolate downstream failures and provide fallback responses.</p>
+        </article>
+        <article class="flow-step">
+          <h3>Adapt</h3>
+          <p>The React app receives one stable dashboard response instead of downstream service contracts.</p>
+        </article>
+      </div>
+    </section>
+
+    <section id="run" aria-labelledby="run-title">
+      <div class="section-heading">
+        <div>
+          <p class="eyebrow">Local Runtime</p>
+          <h2 id="run-title">Run the stack locally</h2>
+        </div>
+        <p>Docker Compose starts the BFF and two WireMock services for realistic local development.</p>
+      </div>
+      <div class="two-column">
+        <article class="panel">
+          <h3>Docker Compose</h3>
+          <pre class="code-block"><code>docker compose up --build</code></pre>
+          <p>Published ports: BFF on 8080, user service on 8081, product service on 8082.</p>
+        </article>
+        <article class="panel">
+          <h3>Authenticated Request</h3>
+          <pre class="code-block"><code>$token = powershell -ExecutionPolicy Bypass -File .\scripts\create-local-jwt.ps1
+Invoke-WebRequest -Headers @{ Authorization = "Bearer $token" } http://localhost:8080/api/dashboard</code></pre>
+        </article>
+      </div>
+    </section>
+
+    <section id="quality" aria-labelledby="quality-title">
+      <div class="section-heading">
+        <div>
+          <p class="eyebrow">Quality Gates</p>
+          <h2 id="quality-title">Tests, coverage, and documentation</h2>
+        </div>
+        <p>CI runs one Maven verification path, publishes generated artifacts, and deploys Pages only after success on main.</p>
+      </div>
+      <div class="quality-grid">
+        <article class="quality-card">
+          <strong>Behavior Tests</strong>
+          <p>Security, aggregation, downstream HTTP, fallback behavior, DTO JSON, and architecture boundaries.</p>
+        </article>
+        <article class="quality-card">
+          <strong>Coverage Gate</strong>
+          <p>JaCoCo runs during `mvn verify` and fails the build when configured thresholds are missed.</p>
+        </article>
+        <article class="quality-card">
+          <strong>Generated Docs</strong>
+          <p>Javadoc and coverage HTML are uploaded as artifacts and included in this Pages site.</p>
+        </article>
+      </div>
+    </section>
+
+    <section id="resources" aria-labelledby="resources-title">
+      <div class="section-heading">
+        <div>
+          <p class="eyebrow">Published Resources</p>
+          <h2 id="resources-title">Project links</h2>
+        </div>
+      </div>
+      <div class="quick-links">
+        <a class="button primary" href="https://github.com/__REPOSITORY__">GitHub Repository</a>
+        <a class="button" href="https://github.com/__REPOSITORY__/actions/workflows/ci.yml">CI Status and Runs</a>
+        <a class="button" href="./javadoc/">Generated Javadoc</a>
+        <a class="button" href="./coverage/">JaCoCo Coverage Report</a>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+      React BFF Gateway demonstrates a pragmatic, single-deployable Spring Boot BFF for React applications.
+    </div>
+  </footer>
+
+  <script>
+    (function () {
+      var root = document.documentElement;
+      var button = document.getElementById("theme-toggle");
+      var icon = document.getElementById("theme-icon");
+      var storageKey = "react-bff-gateway-theme";
+      var savedTheme = localStorage.getItem(storageKey);
+      var systemPrefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+
+      function applyTheme(theme) {
+        root.setAttribute("data-theme", theme);
+        button.setAttribute("aria-pressed", String(theme === "dark"));
+        icon.textContent = theme === "dark" ? "Light" : "Dark";
+      }
+
+      applyTheme(savedTheme || (systemPrefersDark ? "dark" : "light"));
+
+      button.addEventListener("click", function () {
+        var nextTheme = root.getAttribute("data-theme") === "dark" ? "light" : "dark";
+        localStorage.setItem(storageKey, nextTheme);
+        applyTheme(nextTheme);
+      });
+    })();
+  </script>
+</body>
+</html>
