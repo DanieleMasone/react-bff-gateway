@@ -1,0 +1,24 @@
+{
+  "request": {
+    "method": "GET",
+    "urlPathPattern": "/users/[^/]+/recommendations"
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "Content-Type": "application/json"
+    },
+    "jsonBody": [
+      {
+        "id": "prd-001",
+        "name": "Premium Account",
+        "price": 9.99
+      },
+      {
+        "id": "prd-002",
+        "name": "Analytics Add-on",
+        "price": 19.50
+      }
+    ]
+  }
+}

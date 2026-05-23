@@ -1,0 +1,52 @@
+# Java and Maven
+target/
+*.class
+*.jar
+*.war
+*.ear
+dependency-reduced-pom.xml
+
+# Maven wrapper runtime cache
+.mvn/wrapper/maven-wrapper.jar
+.maven-wrapper-cache/
+
+# Generated coverage and reports
+jacoco.exec
+coverage/
+site/jacoco/
+target/site/jacoco/
+target/jacoco.exec
+
+# Generated Javadoc
+docs/apidocs/
+site/apidocs/
+target/site/apidocs/
+
+# IntelliJ IDEA
+.idea/
+*.iml
+*.iws
+*.ipr
+out/
+
+# Docker and local environment files
+.env
+.env.*
+!.env.example
+docker-data/
+tmp/
+
+# Logs
+logs/
+*.log
+hs_err_pid*
+replay_pid*
+
+# OS files
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Tooling caches
+.scannerwork/
+.vscode/

@@ -1,0 +1,68 @@
+spring:
+  application:
+    name: react-bff-gateway
+
+server:
+  port: ${SERVER_PORT:8080}
+
+security:
+  jwt:
+    issuer-uri: ${BFF_JWT_ISSUER_URI:}
+    jwk-set-uri: ${BFF_JWT_JWK_SET_URI:}
+    issuer: ${BFF_JWT_ISSUER:react-bff-gateway-local}
+    audience: ${BFF_JWT_AUDIENCE:react-dashboard}
+    secret: ${BFF_JWT_SECRET:local-development-secret-change-me-at-least-32-bytes}
+
+downstream:
+  user-service:
+    base-url: ${USER_SERVICE_BASE_URL:http://localhost:8081}
+    timeout: ${USER_SERVICE_TIMEOUT:2s}
+  product-service:
+    base-url: ${PRODUCT_SERVICE_BASE_URL:http://localhost:8082}
+    timeout: ${PRODUCT_SERVICE_TIMEOUT:2s}
+
+management:
+  endpoint:
+    health:
+      probes:
+        enabled: true
+      show-details: when_authorized
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,circuitbreakers,circuitbreakerevents
+  health:
+    circuitbreakers:
+      enabled: true
+  info:
+    env:
+      enabled: true
+
+info:
+  app:
+    name: React BFF Gateway
+    description: Production-oriented Backend for Frontend for a React application.
+
+resilience4j:
+  circuitbreaker:
+    instances:
+      userService:
+        register-health-indicator: true
+        sliding-window-type: count_based
+        sliding-window-size: 10
+        minimum-number-of-calls: 5
+        failure-rate-threshold: 50
+        wait-duration-in-open-state: 10s
+        permitted-number-of-calls-in-half-open-state: 2
+      productService:
+        register-health-indicator: true
+        sliding-window-type: count_based
+        sliding-window-size: 10
+        minimum-number-of-calls: 5
+        failure-rate-threshold: 50
+        wait-duration-in-open-state: 10s
+        permitted-number-of-calls-in-half-open-state: 2
+
+logging:
+  level:
+    com.dani.bff: INFO
