@@ -462,6 +462,7 @@
       </a>
       <div class="nav-links" aria-label="Page sections">
         <a href="#architecture">Architecture</a>
+        <a href="#api">API Docs</a>
         <a href="#run">Run Locally</a>
         <a href="#quality">Quality</a>
         <a href="#resources">Resources</a>
@@ -480,10 +481,11 @@
         <h1 id="hero-title">A production-minded gateway for React dashboards.</h1>
         <p class="lede">
           This portfolio project centralizes JWT security, aggregates user and product APIs,
-          applies Resilience4j fallbacks, and publishes generated quality documentation from CI.
+          applies Resilience4j fallbacks, and publishes generated API and quality documentation from CI.
         </p>
         <div class="hero-actions" aria-label="Primary resources">
           <a class="button primary" href="https://github.com/__REPOSITORY__">View Repository</a>
+          <a class="button" href="./api/">API Docs</a>
           <a class="button" href="./javadoc/">Javadoc</a>
           <a class="button" href="./coverage/">Coverage</a>
           <a class="button" href="https://github.com/__REPOSITORY__/actions/workflows/ci.yml">CI Workflow</a>
@@ -505,8 +507,8 @@
             <span>Circuit breakers and stable fallbacks.</span>
           </div>
           <div class="signal">
-            <strong>Docker</strong>
-            <span>BFF plus WireMock downstreams.</span>
+            <strong>OpenAPI 3</strong>
+            <span>Swagger UI locally, Redoc on Pages.</span>
           </div>
           <div class="signal">
             <strong>JaCoCo</strong>
@@ -515,6 +517,10 @@
           <div class="signal">
             <strong>Javadoc</strong>
             <span>Generated API docs published from CI.</span>
+          </div>
+          <div class="signal">
+            <strong>Docker</strong>
+            <span>BFF plus WireMock downstreams.</span>
           </div>
         </div>
       </aside>
@@ -589,6 +595,39 @@
       </div>
     </section>
 
+    <section id="api" aria-labelledby="api-title">
+      <div class="section-heading">
+        <div>
+          <p class="eyebrow">API Contract</p>
+          <h2 id="api-title">OpenAPI reference for the React-facing contract</h2>
+        </div>
+        <p>CI starts the BFF, exports the generated OpenAPI JSON and YAML, and publishes a Redoc reference with the Pages site.</p>
+      </div>
+      <div class="two-column">
+        <article class="panel">
+          <h3>Developer Experience</h3>
+          <p>
+            Swagger UI is enabled in the local profile for authenticated API exploration with the Authorize button.
+            Generated specs are published from CI instead of being committed.
+          </p>
+          <div class="quick-links">
+            <a class="button primary" href="./api/">Open API Reference</a>
+            <a class="button" href="./api/openapi.json">OpenAPI JSON</a>
+            <a class="button" href="./api/openapi.yaml">OpenAPI YAML</a>
+          </div>
+        </article>
+        <article class="panel">
+          <h3>Documented Contract</h3>
+          <p>
+            The spec describes Bearer JWT authentication, the dashboard response, structured error responses,
+            and the resilience fallback behavior exposed to the React client.
+          </p>
+          <pre class="code-block"><code>GET /api/dashboard
+Authorization: Bearer &lt;jwt&gt;</code></pre>
+        </article>
+      </div>
+    </section>
+
     <section aria-labelledby="flow-title">
       <div class="section-heading">
         <div>
@@ -657,7 +696,7 @@ Invoke-WebRequest -Headers @{ Authorization = "Bearer $token" } http://localhost
         </article>
         <article class="quality-card">
           <strong>Generated Docs</strong>
-          <p>Javadoc and coverage HTML are uploaded as artifacts and included in this Pages site.</p>
+          <p>OpenAPI specs, Redoc API reference, Javadoc, and coverage HTML are published from CI.</p>
         </article>
       </div>
     </section>
@@ -672,6 +711,7 @@ Invoke-WebRequest -Headers @{ Authorization = "Bearer $token" } http://localhost
       <div class="quick-links">
         <a class="button primary" href="https://github.com/__REPOSITORY__">GitHub Repository</a>
         <a class="button" href="https://github.com/__REPOSITORY__/actions/workflows/ci.yml">CI Status and Runs</a>
+        <a class="button" href="./api/">API Documentation</a>
         <a class="button" href="./javadoc/">Generated Javadoc</a>
         <a class="button" href="./coverage/">JaCoCo Coverage Report</a>
       </div>
@@ -690,7 +730,23 @@ Invoke-WebRequest -Headers @{ Authorization = "Bearer $token" } http://localhost
       var button = document.getElementById("theme-toggle");
       var icon = document.getElementById("theme-icon");
       var storageKey = "react-bff-gateway-theme";
-      var savedTheme = localStorage.getItem(storageKey);
+      function readStoredTheme() {
+        try {
+          return window.localStorage.getItem(storageKey);
+        } catch (error) {
+          return null;
+        }
+      }
+
+      function storeTheme(theme) {
+        try {
+          window.localStorage.setItem(storageKey, theme);
+        } catch (error) {
+          return;
+        }
+      }
+
+      var savedTheme = readStoredTheme();
       var systemPrefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
 
       function applyTheme(theme) {
@@ -703,7 +759,7 @@ Invoke-WebRequest -Headers @{ Authorization = "Bearer $token" } http://localhost
 
       button.addEventListener("click", function () {
         var nextTheme = root.getAttribute("data-theme") === "dark" ? "light" : "dark";
-        localStorage.setItem(storageKey, nextTheme);
+        storeTheme(nextTheme);
         applyTheme(nextTheme);
       });
     })();

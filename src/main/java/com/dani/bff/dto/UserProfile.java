@@ -1,5 +1,6 @@
 package com.dani.bff.dto;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import java.util.Objects;
 
 /**
@@ -9,7 +10,14 @@ import java.util.Objects;
  * @param displayName display-ready user name
  * @param email email address shown in account-oriented UI
  */
-public record UserProfile(String id, String displayName, String email) {
+@Schema(description = "User identity fields exposed to the React dashboard.")
+public record UserProfile(
+        @Schema(description = "Stable user identifier.", example = "user-123")
+        String id,
+        @Schema(description = "Display-ready user name.", example = "Demo User")
+        String displayName,
+        @Schema(description = "Email address shown in account UI.", example = "demo@example.com")
+        String email) {
 
     public UserProfile {
         Objects.requireNonNull(id, "id must not be null");

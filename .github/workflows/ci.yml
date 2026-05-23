@@ -43,6 +43,30 @@ jobs:
       - name: Generate Javadoc
         run: ./mvnw -B -ntp javadoc:javadoc
 
+      - name: Export OpenAPI specification
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p target/openapi
+          cleanup() {
+            if [[ -n "${APP_PID:-}" ]]; then
+              kill "${APP_PID}" 2>/dev/null || true
+              wait "${APP_PID}" 2>/dev/null || true
+            fi
+          }
+          trap cleanup EXIT
+          java -jar target/react-bff-gateway-*.jar \
+            --spring.profiles.active=local \
+            --server.port=8080 \
+            > target/openapi/application.log 2>&1 &
+          APP_PID=$!
+          curl --fail --silent --show-error --retry 30 --retry-delay 2 --retry-connrefused \
+            http://localhost:8080/v3/api-docs \
+            --output target/openapi/openapi.json
+          curl --fail --silent --show-error --retry 5 \
+            http://localhost:8080/v3/api-docs.yaml \
+            --output target/openapi/openapi.yaml
+
       - name: Upload test reports on failure
         if: failure()
         uses: actions/upload-artifact@v4
@@ -72,15 +96,32 @@ jobs:
           if-no-files-found: ignore
           retention-days: 14
 
+      - name: Upload OpenAPI specification
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: openapi-specification
+          path: |
+            target/openapi/openapi.json
+            target/openapi/openapi.yaml
+          if-no-files-found: ignore
+          retention-days: 14
+
       - name: Prepare GitHub Pages content
         if: github.event_name == 'push' && github.ref == 'refs/heads/main'
         shell: bash
         run: |
           set -euo pipefail
-          mkdir -p target/pages/javadoc target/pages/coverage
+          mkdir -p target/pages/javadoc target/pages/coverage target/pages/api
           cp -R target/site/apidocs/. target/pages/javadoc/
           cp -R target/site/jacoco/. target/pages/coverage/
+          cp target/openapi/openapi.json target/pages/api/openapi.json
+          cp target/openapi/openapi.yaml target/pages/api/openapi.yaml
           sed "s#__REPOSITORY__#${GITHUB_REPOSITORY}#g" .github/pages/index.html > target/pages/index.html
+          sed "s#__REPOSITORY__#${GITHUB_REPOSITORY}#g" .github/pages/api/index.html > target/pages/api/index.html
+          curl --fail --location --silent --show-error --retry 3 \
+            https://cdn.jsdelivr.net/npm/redoc@2.5.2/bundles/redoc.standalone.js \
+            --output target/pages/api/redoc.standalone.js
 
       - name: Configure GitHub Pages
         if: github.event_name == 'push' && github.ref == 'refs/heads/main'

@@ -23,6 +23,7 @@
         <jacoco.version>0.8.12</jacoco.version>
         <mockwebserver.version>4.12.0</mockwebserver.version>
         <resilience4j.version>2.3.0</resilience4j.version>
+        <springdoc-openapi.version>2.8.17</springdoc-openapi.version>
         <maven-javadoc-plugin.version>3.11.2</maven-javadoc-plugin.version>
     </properties>
 
@@ -46,6 +47,11 @@
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-webflux</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springdoc</groupId>
+            <artifactId>springdoc-openapi-starter-webflux-ui</artifactId>
+            <version>${springdoc-openapi.version}</version>
         </dependency>
         <dependency>
             <groupId>io.github.resilience4j</groupId>

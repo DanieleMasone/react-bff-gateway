@@ -53,4 +53,16 @@ class DashboardSecurityTest {
                 .jsonPath("$.status").isEqualTo(403)
                 .jsonPath("$.message").isEqualTo("Access is denied");
     }
+
+    @Test
+    void apiDocumentationRoutesAreDeniedWhenNotExplicitlyEnabled() {
+        webTestClient.mutateWith(mockJwt().jwt(jwt -> jwt.subject("user-123")))
+                .get()
+                .uri("/v3/api-docs")
+                .exchange()
+                .expectStatus().isForbidden()
+                .expectBody()
+                .jsonPath("$.status").isEqualTo(403)
+                .jsonPath("$.message").isEqualTo("Access is denied");
+    }
 }

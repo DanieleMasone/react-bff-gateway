@@ -4,7 +4,7 @@ This file guides future Codex and AI coding agents working on `react-bff-gateway
 
 ## Project Purpose
 
-`react-bff-gateway` is a Java 21 Spring Boot Backend for Frontend for a React dashboard. It exposes one stable `/api/dashboard` endpoint, validates JWTs, aggregates user and product downstream services with `WebClient`, applies Resilience4j circuit-breaker fallbacks, and publishes generated documentation through GitHub Pages.
+`react-bff-gateway` is a Java 21 Spring Boot Backend for Frontend for a React dashboard. It exposes one stable `/api/dashboard` endpoint, validates JWTs, aggregates user and product downstream services with `WebClient`, applies Resilience4j circuit-breaker fallbacks, documents the API contract with OpenAPI 3, and publishes generated documentation through GitHub Pages.
 
 The repository is a portfolio project. Keep it credible, small, production-minded, and honest.
 
@@ -40,6 +40,7 @@ Do not split the project into fake microservices. The downstream user and produc
 - `/api/**` must require authentication.
 - `/actuator/health` and `/actuator/health/**` must remain public.
 - All other routes must be denied by default.
+- OpenAPI JSON/YAML and Swagger UI must stay disabled by default and enabled intentionally for local/docs generation.
 - Authentication and authorization failures must return structured JSON `ApiError` bodies.
 - JWT decoder precedence is JWK set URI, issuer URI, then local HMAC secret.
 - Tests must not require a real identity provider.
@@ -69,6 +70,8 @@ Tests should cover:
 - DTO serialization/deserialization
 - structured error responses
 - package boundaries
+- OpenAPI JSON/YAML generation and Bearer JWT security metadata
+- local Swagger UI availability when documentation is enabled
 
 Do not add superficial tests just to raise coverage. Do not add Arquillian. Do not add Testcontainers unless a real external runtime dependency is introduced.
 
@@ -86,6 +89,23 @@ It writes HTML under `target/site/apidocs`.
 
 Never commit generated coverage or Javadoc output.
 
+## OpenAPI and API Documentation
+
+Springdoc OpenAPI support is provided by `springdoc-openapi-starter-webflux-ui`.
+
+Expectations:
+
+- Keep the documented API surface limited to real BFF endpoints.
+- Do not invent endpoints to make the API reference look larger.
+- Keep `GET /api/dashboard` documented with summary, description, response examples, structured error examples, and Bearer JWT security.
+- Keep `ApiError` and public response DTO schemas useful and aligned with serialization reality.
+- Use `springdoc.api-docs.enabled` for OpenAPI JSON/YAML generation.
+- Use `bff.documentation.swagger-ui-enabled` for the local static Swagger UI shell.
+- Do not enable docs publicly by default in production-oriented configuration.
+- Generated `openapi.json` and `openapi.yaml` belong under `target/openapi` or the CI Pages artifact, not in source control.
+
+Swagger UI is a local development aid at `/swagger-ui.html` when documentation is enabled. The Pages site publishes a Redoc-rendered API reference from the generated OpenAPI JSON.
+
 ## CI/CD Expectations
 
 GitHub Actions workflow: `.github/workflows/ci.yml`.
@@ -97,8 +117,9 @@ The workflow must:
 - set up Java 21
 - cache Maven dependencies
 - run validation, tests, packaging, coverage, and Javadoc
+- export OpenAPI JSON/YAML from the running BFF
 - upload test reports on failure
-- upload JaCoCo and Javadoc artifacts
+- upload JaCoCo, Javadoc, and OpenAPI artifacts
 - deploy GitHub Pages only from successful pushes to `main`
 - use current official GitHub Pages actions
 
@@ -106,11 +127,11 @@ Before changing Pages or Actions behavior, check current official GitHub documen
 
 ## GitHub Pages Flow
 
-The committed landing page template is `.github/pages/index.html`.
+The committed landing page template is `.github/pages/index.html`. The committed API documentation template is `.github/pages/api/index.html`.
 
-CI copies generated Javadoc to `target/pages/javadoc`, generated JaCoCo coverage to `target/pages/coverage`, substitutes the repository name into the template, uploads the Pages artifact, and deploys with GitHub Pages.
+CI copies generated Javadoc to `target/pages/javadoc`, generated JaCoCo coverage to `target/pages/coverage`, generated OpenAPI specs to `target/pages/api`, downloads the pinned Redoc standalone script into the Pages artifact, substitutes the repository name into templates, uploads the Pages artifact, and deploys with GitHub Pages.
 
-Keep the Pages template accessible, responsive, dependency-free, and useful as a portfolio landing page.
+Keep the Pages templates accessible, responsive, lightweight, and useful as portfolio documentation. Avoid frontend build chains for documentation.
 
 ## Docker Expectations
 
@@ -134,6 +155,7 @@ Allowed dependency areas:
 - Spring Security OAuth2 Resource Server
 - Resilience4j
 - Spring Boot Actuator
+- Springdoc OpenAPI for WebFlux
 - test libraries that validate real behavior
 - JaCoCo and Javadoc plugins
 
@@ -147,6 +169,7 @@ Do not commit:
 - `.maven-wrapper-cache/`
 - JaCoCo reports
 - Javadoc output
+- generated OpenAPI specs
 - logs
 - IDE files
 - Docker local data
@@ -174,6 +197,8 @@ Also check:
 
 - GitHub Actions YAML remains valid.
 - Pages artifact generation still includes `index.html`, `javadoc/`, and `coverage/`.
+- Pages artifact generation includes `api/index.html`, `api/openapi.json`, and `api/openapi.yaml`.
+- Swagger UI works locally at `/swagger-ui.html` when documentation is enabled.
 - README matches real behavior.
 - Generated files are ignored.
 

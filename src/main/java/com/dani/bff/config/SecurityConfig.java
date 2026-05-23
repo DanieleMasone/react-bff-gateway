@@ -6,6 +6,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import java.nio.charset.StandardCharsets;
 import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpStatus;
@@ -41,16 +42,29 @@ public class SecurityConfig {
      *
      * @param http Spring Security reactive HTTP builder
      * @param objectMapper JSON serializer for authentication errors
+     * @param openApiDocsEnabled whether the OpenAPI JSON/YAML endpoint is intentionally enabled
+     * @param localSwaggerUiEnabled whether the local static Swagger UI shell is intentionally enabled
      * @return the configured security filter chain
      */
     @Bean
-    public SecurityWebFilterChain securityWebFilterChain(ServerHttpSecurity http, ObjectMapper objectMapper) {
+    public SecurityWebFilterChain securityWebFilterChain(
+            ServerHttpSecurity http,
+            ObjectMapper objectMapper,
+            @Value("${springdoc.api-docs.enabled:false}") boolean openApiDocsEnabled,
+            @Value("${bff.documentation.swagger-ui-enabled:false}") boolean localSwaggerUiEnabled) {
         return http
                 .csrf(ServerHttpSecurity.CsrfSpec::disable)
-                .authorizeExchange(exchanges -> exchanges
-                        .pathMatchers("/actuator/health", "/actuator/health/**").permitAll()
-                        .pathMatchers("/api/**").authenticated()
-                        .anyExchange().denyAll())
+                .authorizeExchange(exchanges -> {
+                    exchanges.pathMatchers("/actuator/health", "/actuator/health/**").permitAll();
+                    if (openApiDocsEnabled) {
+                        exchanges.pathMatchers("/v3/api-docs", "/v3/api-docs.yaml", "/v3/api-docs/**").permitAll();
+                    }
+                    if (localSwaggerUiEnabled) {
+                        exchanges.pathMatchers("/swagger-ui.html", "/swagger-ui/**", "/webjars/swagger-ui/**").permitAll();
+                    }
+                    exchanges.pathMatchers("/api/**").authenticated()
+                            .anyExchange().denyAll();
+                })
                 .exceptionHandling(errors -> errors
                         .authenticationEntryPoint(authenticationEntryPoint(objectMapper))
                         .accessDeniedHandler(accessDeniedHandler(objectMapper)))

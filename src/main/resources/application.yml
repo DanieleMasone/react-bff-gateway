@@ -13,6 +13,21 @@ security:
     audience: ${BFF_JWT_AUDIENCE:react-dashboard}
     secret: ${BFF_JWT_SECRET:local-development-secret-change-me-at-least-32-bytes}
 
+bff:
+  documentation:
+    swagger-ui-enabled: ${BFF_SWAGGER_UI_ENABLED:false}
+
+springdoc:
+  api-docs:
+    enabled: ${SPRINGDOC_API_DOCS_ENABLED:false}
+    path: /v3/api-docs
+    version: openapi_3_0
+  swagger-ui:
+    enabled: false
+  packages-to-scan: com.dani.bff.api
+  paths-to-match: /api/**
+  show-actuator: false
+
 downstream:
   user-service:
     base-url: ${USER_SERVICE_BASE_URL:http://localhost:8081}

@@ -34,8 +34,11 @@ class ArchitectureTest {
                 .that().resideInAPackage("..api..")
                 .should().onlyDependOnClassesThat().resideInAnyPackage(
                         "com.dani.bff.api..",
+                        "com.dani.bff.config..",
                         "com.dani.bff.dto..",
+                        "com.dani.bff.error..",
                         "com.dani.bff.service..",
+                        "io.swagger.v3.oas.annotations..",
                         "java..",
                         "org.springframework..",
                         "reactor..");
