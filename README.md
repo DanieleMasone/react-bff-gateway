@@ -60,7 +60,7 @@ Local development:
 - `GET /swagger-ui.html` opens the standard Springdoc Swagger UI backed by `/v3/api-docs`.
 - Swagger UI supports the Authorize button because the spec declares a Bearer JWT security scheme.
 
-API documentation is intentionally disabled in the default production-oriented configuration. The `local` profile enables it for development. CI starts the app with the local profile, exports `openapi.json` and `openapi.yaml`, uploads them as artifacts, and publishes the generated specs under GitHub Pages.
+API documentation is intentionally disabled in the default production-oriented configuration. The `local` profile enables it for development. CI starts the app with the local profile, exports `openapi.json` and `openapi.yaml`, uploads them as artifacts, and publishes a static Swagger UI under GitHub Pages from generated Springdoc assets.
 
 The documented contract focuses on the real BFF surface:
 
@@ -289,9 +289,10 @@ CI automates this export after `verify` and Javadoc generation. Generated specs 
 ```text
 api/openapi.json
 api/openapi.yaml
+swagger-ui/index.html
 ```
 
-The repository does not commit generated OpenAPI specs. The contract is generated from source annotations and the running application.
+The repository does not commit generated OpenAPI specs or generated Swagger UI output. The contract is generated from source annotations and the running application.
 
 ## Mapping Strategy
 
@@ -324,7 +325,7 @@ The workflow:
 - runs Maven `validate`
 - runs `verify`, including tests, packaging, JaCoCo report generation, and coverage checks
 - generates Javadoc
-- starts the BFF with the local profile and exports OpenAPI JSON/YAML
+- starts the BFF with the local profile and exports OpenAPI JSON/YAML plus static Swagger UI assets
 - uploads test reports on failure
 - uploads JaCoCo HTML, Javadoc, and OpenAPI specs as artifacts
 - assembles GitHub Pages content from generated reports, generated specs, and `.github/pages/index.html`
@@ -338,12 +339,13 @@ It includes:
 
 - portfolio-grade project overview
 - accessible architecture diagram
+- CI-generated Swagger UI backed by the generated OpenAPI JSON
 - downloadable OpenAPI JSON and YAML
 - local development and Docker instructions
 - testing, coverage, and documentation summary
 - links to the GitHub repository, Actions workflow, generated Javadoc, and JaCoCo coverage
 
-Only `.github/pages/index.html` is manually maintained. Javadoc, JaCoCo coverage, and OpenAPI specs are generated under `target` during Maven/CI execution and copied into the Pages artifact.
+Only `.github/pages/index.html` is manually maintained. Javadoc, JaCoCo coverage, OpenAPI specs, and static Swagger UI output are generated under `target` during Maven/CI execution and copied into the Pages artifact.
 
 Repository Pages settings should use GitHub Actions as the Pages source.
 
@@ -377,7 +379,7 @@ Java records and explicit configuration classes keep the build transparent witho
 
 - Backend for Frontend pattern for React applications
 - JWT-secured API boundary
-- OpenAPI 3 documentation with local Springdoc Swagger UI and Pages-hosted specs
+- OpenAPI 3 documentation with local Springdoc Swagger UI, Pages-hosted Swagger UI, and generated specs
 - WebClient-based downstream aggregation
 - Resilience4j fallbacks with stable frontend contracts
 - Structured API errors

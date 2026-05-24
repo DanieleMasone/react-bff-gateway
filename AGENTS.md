@@ -105,7 +105,7 @@ Expectations:
 - Do not enable docs publicly by default in production-oriented configuration.
 - Generated `openapi.json` and `openapi.yaml` belong under `target/openapi` or the CI Pages artifact, not in source control.
 
-Swagger UI is a local development aid at `/swagger-ui.html` when documentation is enabled. It must be provided by Springdoc dependency/configuration, not by a custom committed HTML page. The Pages site links to generated OpenAPI JSON and YAML specs instead of maintaining a duplicate API documentation page.
+Swagger UI is a local development aid at `/swagger-ui.html` when documentation is enabled. It must be provided by Springdoc dependency/configuration, not by a custom committed HTML page. CI may publish generated static Swagger UI output under `target/pages/swagger-ui`, but that output must be assembled from the running Springdoc UI assets and generated OpenAPI spec, not committed as source.
 
 ## Mapping Strategy
 
@@ -134,7 +134,7 @@ Before changing Pages or Actions behavior, check current official GitHub documen
 
 The only manually maintained landing page is `.github/pages/index.html`.
 
-CI copies generated Javadoc to `target/pages/javadoc`, generated JaCoCo coverage to `target/pages/coverage`, generated OpenAPI specs to `target/pages/api`, substitutes the repository name into the landing page template, uploads the Pages artifact, and deploys with GitHub Pages.
+CI copies generated Javadoc to `target/pages/javadoc`, generated JaCoCo coverage to `target/pages/coverage`, generated OpenAPI specs to `target/pages/api`, generated Swagger UI output to `target/pages/swagger-ui`, substitutes the repository name into the landing page template, uploads the Pages artifact, and deploys with GitHub Pages.
 
 Keep the Pages template accessible, responsive, lightweight, and useful as portfolio documentation. Avoid frontend build chains and duplicated manually maintained documentation pages.
 
@@ -175,6 +175,7 @@ Do not commit:
 - JaCoCo reports
 - Javadoc output
 - generated OpenAPI specs
+- generated Swagger UI output
 - generated mapper implementations
 - logs
 - IDE files
@@ -203,7 +204,7 @@ Also check:
 
 - GitHub Actions YAML remains valid.
 - Pages artifact generation still includes `index.html`, `javadoc/`, and `coverage/`.
-- Pages artifact generation includes `api/openapi.json` and `api/openapi.yaml`.
+- Pages artifact generation includes `api/openapi.json`, `api/openapi.yaml`, and `swagger-ui/index.html`.
 - Swagger UI works locally at `/swagger-ui.html` when documentation is enabled.
 - README matches real behavior.
 - The landing page matches the implementation and remains the only manually maintained Pages HTML file.

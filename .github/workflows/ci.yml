@@ -47,7 +47,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          mkdir -p target/openapi
+          mkdir -p target/openapi target/swagger-ui
           cleanup() {
             if [[ -n "${APP_PID:-}" ]]; then
               kill "${APP_PID}" 2>/dev/null || true
@@ -66,6 +66,46 @@ jobs:
           curl --fail --silent --show-error --retry 5 \
             http://localhost:8080/v3/api-docs.yaml \
             --output target/openapi/openapi.yaml
+          curl --fail --silent --show-error --retry 5 \
+            http://localhost:8080/swagger-ui/index.html \
+            --output target/swagger-ui/index.html
+          curl --fail --silent --show-error --retry 5 \
+            http://localhost:8080/swagger-ui/swagger-ui.css \
+            --output target/swagger-ui/swagger-ui.css
+          curl --fail --silent --show-error --retry 5 \
+            http://localhost:8080/swagger-ui/index.css \
+            --output target/swagger-ui/index.css
+          curl --fail --silent --show-error --retry 5 \
+            http://localhost:8080/swagger-ui/swagger-ui-bundle.js \
+            --output target/swagger-ui/swagger-ui-bundle.js
+          curl --fail --silent --show-error --retry 5 \
+            http://localhost:8080/swagger-ui/swagger-ui-standalone-preset.js \
+            --output target/swagger-ui/swagger-ui-standalone-preset.js
+          curl --fail --silent --show-error --retry 5 \
+            http://localhost:8080/swagger-ui/favicon-32x32.png \
+            --output target/swagger-ui/favicon-32x32.png
+          curl --fail --silent --show-error --retry 5 \
+            http://localhost:8080/swagger-ui/favicon-16x16.png \
+            --output target/swagger-ui/favicon-16x16.png
+          cat > target/swagger-ui/swagger-initializer.js <<'SWAGGER_UI'
+          window.onload = function() {
+            window.ui = SwaggerUIBundle({
+              url: "../api/openapi.json",
+              dom_id: "#swagger-ui",
+              deepLinking: true,
+              displayRequestDuration: true,
+              persistAuthorization: true,
+              operationsSorter: "alpha",
+              tagsSorter: "alpha",
+              presets: [
+                SwaggerUIBundle.presets.apis,
+                SwaggerUIStandalonePreset
+              ],
+              layout: "StandaloneLayout",
+              validatorUrl: ""
+            });
+          };
+          SWAGGER_UI
 
       - name: Upload test reports on failure
         if: failure()
@@ -112,11 +152,12 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          mkdir -p target/pages/javadoc target/pages/coverage target/pages/api
+          mkdir -p target/pages/javadoc target/pages/coverage target/pages/api target/pages/swagger-ui
           cp -R target/site/apidocs/. target/pages/javadoc/
           cp -R target/site/jacoco/. target/pages/coverage/
           cp target/openapi/openapi.json target/pages/api/openapi.json
           cp target/openapi/openapi.yaml target/pages/api/openapi.yaml
+          cp -R target/swagger-ui/. target/pages/swagger-ui/
           sed "s#__REPOSITORY__#${GITHUB_REPOSITORY}#g" .github/pages/index.html > target/pages/index.html
 
       - name: Configure GitHub Pages

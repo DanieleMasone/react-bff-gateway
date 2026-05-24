@@ -541,7 +541,7 @@
         </p>
         <div class="hero-actions" aria-label="Primary resources">
           <a class="button primary" href="https://github.com/__REPOSITORY__">View Repository</a>
-          <a class="button" href="./api/openapi.json">OpenAPI JSON</a>
+          <a class="button" href="./swagger-ui/">Swagger UI</a>
           <a class="button" href="./javadoc/">Javadoc</a>
           <a class="button" href="./coverage/">Coverage</a>
           <a class="button" href="https://github.com/__REPOSITORY__/actions/workflows/ci.yml">CI Workflow</a>
@@ -564,7 +564,7 @@
           </div>
           <div class="signal">
             <strong>OpenAPI 3</strong>
-            <span>Springdoc Swagger UI locally; generated specs on Pages.</span>
+            <span>Springdoc Swagger UI locally and published from CI.</span>
           </div>
           <div class="signal">
             <strong>JaCoCo</strong>
@@ -680,17 +680,18 @@
           <p class="eyebrow">API Contract</p>
           <h2 id="api-title">OpenAPI reference for the React-facing contract</h2>
         </div>
-        <p>CI starts the BFF, exports generated OpenAPI JSON and YAML, and publishes those specs with the Pages site.</p>
+        <p>CI starts the BFF, exports OpenAPI JSON/YAML, and publishes a static Swagger UI assembled from Springdoc assets.</p>
       </div>
       <div class="two-column">
         <article class="panel">
           <h3>Developer Experience</h3>
           <p>
             Springdoc provides Swagger UI in the local profile for authenticated API exploration with the Authorize button.
-            Generated specs are published from CI instead of being committed.
+            CI publishes the same contract as a static Swagger UI plus downloadable specs.
           </p>
           <div class="quick-links">
-            <a class="button primary" href="./api/openapi.json">Download JSON</a>
+            <a class="button primary" href="./swagger-ui/">Open Swagger UI</a>
+            <a class="button" href="./api/openapi.json">OpenAPI JSON</a>
             <a class="button" href="./api/openapi.yaml">OpenAPI YAML</a>
             <a class="button" href="https://github.com/__REPOSITORY__/actions/workflows/ci.yml">CI Workflow</a>
           </div>
@@ -789,6 +790,7 @@ Invoke-WebRequest -Headers @{ Authorization = "Bearer $token" } http://localhost
       <div class="quick-links">
         <a class="button primary" href="https://github.com/__REPOSITORY__">GitHub Repository</a>
         <a class="button" href="https://github.com/__REPOSITORY__/actions/workflows/ci.yml">CI Status and Runs</a>
+        <a class="button" href="./swagger-ui/">Published Swagger UI</a>
         <a class="button" href="./api/openapi.json">OpenAPI JSON</a>
         <a class="button" href="./api/openapi.yaml">OpenAPI YAML</a>
         <a class="button" href="./javadoc/">Generated Javadoc</a>
