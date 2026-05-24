@@ -32,6 +32,7 @@ Do not split the project into fake microservices. The downstream user and produc
 - Keep configuration externalized through `application.yml`.
 - Preserve the deny-by-default security posture.
 - Do not add Lombok.
+- Do not add MapStruct unless mapping complexity clearly justifies generated mapper code.
 - Do not add frameworks or abstractions just to make the project look larger.
 - Remove dead code, unused methods, unused imports, and obsolete configuration when found.
 
@@ -100,11 +101,15 @@ Expectations:
 - Keep `GET /api/dashboard` documented with summary, description, response examples, structured error examples, and Bearer JWT security.
 - Keep `ApiError` and public response DTO schemas useful and aligned with serialization reality.
 - Use `springdoc.api-docs.enabled` for OpenAPI JSON/YAML generation.
-- Use `bff.documentation.swagger-ui-enabled` for the local static Swagger UI shell.
+- Use `springdoc.swagger-ui.enabled` for the standard Springdoc Swagger UI.
 - Do not enable docs publicly by default in production-oriented configuration.
 - Generated `openapi.json` and `openapi.yaml` belong under `target/openapi` or the CI Pages artifact, not in source control.
 
-Swagger UI is a local development aid at `/swagger-ui.html` when documentation is enabled. The Pages site publishes a Redoc-rendered API reference from the generated OpenAPI JSON.
+Swagger UI is a local development aid at `/swagger-ui.html` when documentation is enabled. It must be provided by Springdoc dependency/configuration, not by a custom committed HTML page. The Pages site links to generated OpenAPI JSON and YAML specs instead of maintaining a duplicate API documentation page.
+
+## Mapping Strategy
+
+MapStruct is intentionally not part of the current project. The existing downstream-to-frontend mappings are small Java record methods with simple defaulting rules. Do not add MapStruct to replace one-line constructors or make the repository look more enterprise-oriented. If mapping complexity becomes real, add it with tests, Maven annotation processing, generated sources under `target/generated-sources`, and updated README/AGENTS guidance.
 
 ## CI/CD Expectations
 
@@ -127,11 +132,11 @@ Before changing Pages or Actions behavior, check current official GitHub documen
 
 ## GitHub Pages Flow
 
-The committed landing page template is `.github/pages/index.html`. The committed API documentation template is `.github/pages/api/index.html`.
+The only manually maintained landing page is `.github/pages/index.html`.
 
-CI copies generated Javadoc to `target/pages/javadoc`, generated JaCoCo coverage to `target/pages/coverage`, generated OpenAPI specs to `target/pages/api`, downloads the pinned Redoc standalone script into the Pages artifact, substitutes the repository name into templates, uploads the Pages artifact, and deploys with GitHub Pages.
+CI copies generated Javadoc to `target/pages/javadoc`, generated JaCoCo coverage to `target/pages/coverage`, generated OpenAPI specs to `target/pages/api`, substitutes the repository name into the landing page template, uploads the Pages artifact, and deploys with GitHub Pages.
 
-Keep the Pages templates accessible, responsive, lightweight, and useful as portfolio documentation. Avoid frontend build chains for documentation.
+Keep the Pages template accessible, responsive, lightweight, and useful as portfolio documentation. Avoid frontend build chains and duplicated manually maintained documentation pages.
 
 ## Docker Expectations
 
@@ -170,6 +175,7 @@ Do not commit:
 - JaCoCo reports
 - Javadoc output
 - generated OpenAPI specs
+- generated mapper implementations
 - logs
 - IDE files
 - Docker local data
@@ -197,9 +203,10 @@ Also check:
 
 - GitHub Actions YAML remains valid.
 - Pages artifact generation still includes `index.html`, `javadoc/`, and `coverage/`.
-- Pages artifact generation includes `api/index.html`, `api/openapi.json`, and `api/openapi.yaml`.
+- Pages artifact generation includes `api/openapi.json` and `api/openapi.yaml`.
 - Swagger UI works locally at `/swagger-ui.html` when documentation is enabled.
 - README matches real behavior.
+- The landing page matches the implementation and remains the only manually maintained Pages HTML file.
 - Generated files are ignored.
 
 ## Things To Avoid

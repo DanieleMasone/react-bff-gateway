@@ -118,10 +118,6 @@ jobs:
           cp target/openapi/openapi.json target/pages/api/openapi.json
           cp target/openapi/openapi.yaml target/pages/api/openapi.yaml
           sed "s#__REPOSITORY__#${GITHUB_REPOSITORY}#g" .github/pages/index.html > target/pages/index.html
-          sed "s#__REPOSITORY__#${GITHUB_REPOSITORY}#g" .github/pages/api/index.html > target/pages/api/index.html
-          curl --fail --location --silent --show-error --retry 3 \
-            https://cdn.jsdelivr.net/npm/redoc@2.5.2/bundles/redoc.standalone.js \
-            --output target/pages/api/redoc.standalone.js
 
       - name: Configure GitHub Pages
         if: github.event_name == 'push' && github.ref == 'refs/heads/main'

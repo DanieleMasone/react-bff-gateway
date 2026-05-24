@@ -57,6 +57,14 @@
       color: var(--accent-strong);
     }
 
+    code {
+      border-radius: 6px;
+      padding: 2px 5px;
+      background: var(--code-bg);
+      font-family: ui-monospace, SFMono-Regular, Consolas, "Liberation Mono", monospace;
+      font-size: 0.92em;
+    }
+
     a:focus-visible,
     button:focus-visible {
       outline: 3px solid var(--accent);
@@ -218,6 +226,8 @@
       background: var(--surface);
       font-weight: 650;
       text-decoration: none;
+      max-width: 100%;
+      text-align: center;
     }
 
     .button.primary {
@@ -241,6 +251,7 @@
       padding: 22px;
       background: var(--surface);
       box-shadow: var(--shadow);
+      min-width: 0;
     }
 
     .signal-grid,
@@ -257,6 +268,7 @@
       border-radius: 8px;
       padding: 18px;
       background: var(--surface);
+      min-width: 0;
     }
 
     .signal strong,
@@ -290,18 +302,50 @@
     }
 
     .diagram-wrap {
-      overflow-x: auto;
       border: 1px solid var(--border);
       border-radius: 8px;
       background: var(--surface);
       box-shadow: var(--shadow);
+      overflow: hidden;
     }
 
     .architecture-svg {
       display: block;
       width: 100%;
-      min-width: 760px;
       height: auto;
+    }
+
+    .architecture-mobile {
+      display: none;
+    }
+
+    .architecture-mobile-grid {
+      display: grid;
+      gap: 12px;
+      padding: 18px;
+    }
+
+    .mobile-node {
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 14px;
+      background: var(--surface-strong);
+    }
+
+    .mobile-node strong {
+      display: block;
+      margin-bottom: 4px;
+    }
+
+    .mobile-node span {
+      color: var(--muted);
+      font-size: 0.94rem;
+    }
+
+    .mobile-connector {
+      color: var(--accent-strong);
+      font-weight: 800;
+      text-align: center;
     }
 
     .box {
@@ -349,6 +393,7 @@
       border-radius: 8px;
       padding: 18px;
       background: var(--surface);
+      min-width: 0;
     }
 
     .flow-step::before {
@@ -380,11 +425,14 @@
 
     .code-block {
       overflow-x: auto;
+      max-width: 100%;
       border-radius: 8px;
       padding: 16px;
       background: var(--code-bg);
       color: var(--text);
       font-size: 0.92rem;
+      white-space: pre-wrap;
+      overflow-wrap: anywhere;
     }
 
     .two-column {
@@ -442,6 +490,14 @@
         min-width: 44px;
       }
 
+      .architecture-svg {
+        display: none;
+      }
+
+      .architecture-mobile {
+        display: block;
+      }
+
       .theme-label {
         position: absolute;
         width: 1px;
@@ -485,7 +541,7 @@
         </p>
         <div class="hero-actions" aria-label="Primary resources">
           <a class="button primary" href="https://github.com/__REPOSITORY__">View Repository</a>
-          <a class="button" href="./api/">API Docs</a>
+          <a class="button" href="./api/openapi.json">OpenAPI JSON</a>
           <a class="button" href="./javadoc/">Javadoc</a>
           <a class="button" href="./coverage/">Coverage</a>
           <a class="button" href="https://github.com/__REPOSITORY__/actions/workflows/ci.yml">CI Workflow</a>
@@ -508,7 +564,7 @@
           </div>
           <div class="signal">
             <strong>OpenAPI 3</strong>
-            <span>Swagger UI locally, Redoc on Pages.</span>
+            <span>Springdoc Swagger UI locally; generated specs on Pages.</span>
           </div>
           <div class="signal">
             <strong>JaCoCo</strong>
@@ -592,6 +648,29 @@
           <path class="arrow" d="M330 276 C246 278 220 168 180 162"></path>
           <text class="diagram-muted" x="266" y="235" text-anchor="middle">Stable JSON</text>
         </svg>
+        <div class="architecture-mobile" aria-hidden="true">
+          <div class="architecture-mobile-grid">
+            <div class="mobile-node">
+              <strong>React Frontend</strong>
+              <span>Calls <code>GET /api/dashboard</code> with a Bearer JWT.</span>
+            </div>
+            <div class="mobile-connector">down</div>
+            <div class="mobile-node">
+              <strong>Spring Boot BFF</strong>
+              <span>Validates JWTs, owns the dashboard DTO, and coordinates aggregation.</span>
+            </div>
+            <div class="mobile-connector">down</div>
+            <div class="mobile-node">
+              <strong>Resilience4j Boundary</strong>
+              <span>Wraps WebClient calls with circuit breakers and stable fallbacks.</span>
+            </div>
+            <div class="mobile-connector">down</div>
+            <div class="mobile-node">
+              <strong>User and Product Services</strong>
+              <span>Downstream profile and recommendation APIs stay hidden from the React app.</span>
+            </div>
+          </div>
+        </div>
       </div>
     </section>
 
@@ -601,29 +680,28 @@
           <p class="eyebrow">API Contract</p>
           <h2 id="api-title">OpenAPI reference for the React-facing contract</h2>
         </div>
-        <p>CI starts the BFF, exports the generated OpenAPI JSON and YAML, and publishes a Redoc reference with the Pages site.</p>
+        <p>CI starts the BFF, exports generated OpenAPI JSON and YAML, and publishes those specs with the Pages site.</p>
       </div>
       <div class="two-column">
         <article class="panel">
           <h3>Developer Experience</h3>
           <p>
-            Swagger UI is enabled in the local profile for authenticated API exploration with the Authorize button.
+            Springdoc provides Swagger UI in the local profile for authenticated API exploration with the Authorize button.
             Generated specs are published from CI instead of being committed.
           </p>
           <div class="quick-links">
-            <a class="button primary" href="./api/">Open API Reference</a>
-            <a class="button" href="./api/openapi.json">OpenAPI JSON</a>
+            <a class="button primary" href="./api/openapi.json">Download JSON</a>
             <a class="button" href="./api/openapi.yaml">OpenAPI YAML</a>
+            <a class="button" href="https://github.com/__REPOSITORY__/actions/workflows/ci.yml">CI Workflow</a>
           </div>
         </article>
         <article class="panel">
-          <h3>Documented Contract</h3>
+          <h3>Local Swagger UI</h3>
           <p>
-            The spec describes Bearer JWT authentication, the dashboard response, structured error responses,
-            and the resilience fallback behavior exposed to the React client.
+            Run the BFF with the <code>local</code> profile and open the standard Springdoc route:
           </p>
-          <pre class="code-block"><code>GET /api/dashboard
-Authorization: Bearer &lt;jwt&gt;</code></pre>
+          <pre class="code-block"><code>http://localhost:8080/swagger-ui.html</code></pre>
+          <p>The spec describes Bearer JWT authentication, stable DTOs, structured errors, and fallback behavior.</p>
         </article>
       </div>
     </section>
@@ -638,7 +716,7 @@ Authorization: Bearer &lt;jwt&gt;</code></pre>
       <div class="flow-grid">
         <article class="flow-step">
           <h3>Authenticate</h3>
-          <p>The BFF validates a Bearer JWT before any `/api/**` request reaches the controller.</p>
+          <p>The BFF validates a Bearer JWT before any <code>/api/**</code> request reaches the controller.</p>
         </article>
         <article class="flow-step">
           <h3>Aggregate</h3>
@@ -692,11 +770,11 @@ Invoke-WebRequest -Headers @{ Authorization = "Bearer $token" } http://localhost
         </article>
         <article class="quality-card">
           <strong>Coverage Gate</strong>
-          <p>JaCoCo runs during `mvn verify` and fails the build when configured thresholds are missed.</p>
+          <p>JaCoCo runs during <code>mvn verify</code> and fails the build when configured thresholds are missed.</p>
         </article>
         <article class="quality-card">
           <strong>Generated Docs</strong>
-          <p>OpenAPI specs, Redoc API reference, Javadoc, and coverage HTML are published from CI.</p>
+          <p>OpenAPI specs, Javadoc, and coverage HTML are generated under <code>target</code> and published from CI.</p>
         </article>
       </div>
     </section>
@@ -711,7 +789,8 @@ Invoke-WebRequest -Headers @{ Authorization = "Bearer $token" } http://localhost
       <div class="quick-links">
         <a class="button primary" href="https://github.com/__REPOSITORY__">GitHub Repository</a>
         <a class="button" href="https://github.com/__REPOSITORY__/actions/workflows/ci.yml">CI Status and Runs</a>
-        <a class="button" href="./api/">API Documentation</a>
+        <a class="button" href="./api/openapi.json">OpenAPI JSON</a>
+        <a class="button" href="./api/openapi.yaml">OpenAPI YAML</a>
         <a class="button" href="./javadoc/">Generated Javadoc</a>
         <a class="button" href="./coverage/">JaCoCo Coverage Report</a>
       </div>

@@ -2,10 +2,8 @@ logging:
   level:
     com.dani.bff: DEBUG
 
-bff:
-  documentation:
-    swagger-ui-enabled: true
-
 springdoc:
   api-docs:
+    enabled: true
+  swagger-ui:
     enabled: true

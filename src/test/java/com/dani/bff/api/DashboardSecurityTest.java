@@ -64,5 +64,14 @@ class DashboardSecurityTest {
                 .expectBody()
                 .jsonPath("$.status").isEqualTo(403)
                 .jsonPath("$.message").isEqualTo("Access is denied");
+
+        webTestClient.mutateWith(mockJwt().jwt(jwt -> jwt.subject("user-123")))
+                .get()
+                .uri("/swagger-ui.html")
+                .exchange()
+                .expectStatus().isForbidden()
+                .expectBody()
+                .jsonPath("$.status").isEqualTo(403)
+                .jsonPath("$.message").isEqualTo("Access is denied");
     }
 }

@@ -13,7 +13,7 @@ import org.springframework.test.web.reactive.server.WebTestClient;
         webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT,
         properties = {
                 "springdoc.api-docs.enabled=true",
-                "bff.documentation.swagger-ui-enabled=true"
+                "springdoc.swagger-ui.enabled=true"
         })
 @AutoConfigureWebTestClient
 @ActiveProfiles("test")
@@ -56,15 +56,30 @@ class OpenApiDocumentationTest {
     }
 
     @Test
-    void swaggerUiIsAvailableWhenDocumentationIsEnabled() {
+    void swaggerUiIsProvidedBySpringdocWhenDocumentationIsEnabled() {
         webTestClient.get()
                 .uri("/swagger-ui.html")
+                .exchange()
+                .expectStatus().is3xxRedirection()
+                .expectHeader()
+                .value("Location", location -> assertThat(location).contains("/swagger-ui/index.html"));
+
+        webTestClient.get()
+                .uri("/swagger-ui/index.html")
                 .exchange()
                 .expectStatus().isOk()
                 .expectBody(String.class)
                 .value(body -> assertThat(body)
-                        .contains("SwaggerUIBundle")
-                        .contains("/v3/api-docs")
+                        .contains("swagger-ui-bundle.js")
+                        .contains("swagger-initializer.js"));
+
+        webTestClient.get()
+                .uri("/swagger-ui/swagger-initializer.js")
+                .exchange()
+                .expectStatus().isOk()
+                .expectBody(String.class)
+                .value(body -> assertThat(body)
+                        .contains("/v3/api-docs/swagger-config")
                         .contains("persistAuthorization"));
     }
 }

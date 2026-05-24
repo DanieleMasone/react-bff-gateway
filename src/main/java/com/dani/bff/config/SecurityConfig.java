@@ -43,7 +43,7 @@ public class SecurityConfig {
      * @param http Spring Security reactive HTTP builder
      * @param objectMapper JSON serializer for authentication errors
      * @param openApiDocsEnabled whether the OpenAPI JSON/YAML endpoint is intentionally enabled
-     * @param localSwaggerUiEnabled whether the local static Swagger UI shell is intentionally enabled
+     * @param swaggerUiEnabled whether Springdoc Swagger UI is intentionally enabled
      * @return the configured security filter chain
      */
     @Bean
@@ -51,7 +51,7 @@ public class SecurityConfig {
             ServerHttpSecurity http,
             ObjectMapper objectMapper,
             @Value("${springdoc.api-docs.enabled:false}") boolean openApiDocsEnabled,
-            @Value("${bff.documentation.swagger-ui-enabled:false}") boolean localSwaggerUiEnabled) {
+            @Value("${springdoc.swagger-ui.enabled:false}") boolean swaggerUiEnabled) {
         return http
                 .csrf(ServerHttpSecurity.CsrfSpec::disable)
                 .authorizeExchange(exchanges -> {
@@ -59,8 +59,8 @@ public class SecurityConfig {
                     if (openApiDocsEnabled) {
                         exchanges.pathMatchers("/v3/api-docs", "/v3/api-docs.yaml", "/v3/api-docs/**").permitAll();
                     }
-                    if (localSwaggerUiEnabled) {
-                        exchanges.pathMatchers("/swagger-ui.html", "/swagger-ui/**", "/webjars/swagger-ui/**").permitAll();
+                    if (swaggerUiEnabled) {
+                        exchanges.pathMatchers("/swagger-ui.html", "/swagger-ui/**").permitAll();
                     }
                     exchanges.pathMatchers("/api/**").authenticated()
                             .anyExchange().denyAll();

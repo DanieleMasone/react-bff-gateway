@@ -18,7 +18,7 @@ flowchart LR
     breaker -. "empty recommendations" .-> api
     api -. "OpenAPI 3\nlocal Swagger UI" .-> docs["API contract"]
     actuator["Actuator health"] -. "public health only" .-> security
-    ci["CI"] -. "Redoc, Javadoc,\ncoverage reports" .-> docs
+    ci["CI"] -. "OpenAPI specs,\nJavadoc, coverage" .-> docs
 ```
 
 The BFF is a single deployable Spring Boot application. It hides downstream response shapes and service locations from the frontend, then returns immutable Java record DTOs optimized for the React dashboard.
@@ -57,10 +57,10 @@ Local development:
 
 - `GET /v3/api-docs` returns OpenAPI JSON when API docs are enabled.
 - `GET /v3/api-docs.yaml` returns OpenAPI YAML.
-- `GET /swagger-ui.html` opens a lightweight local Swagger UI shell backed by `/v3/api-docs`.
+- `GET /swagger-ui.html` opens the standard Springdoc Swagger UI backed by `/v3/api-docs`.
 - Swagger UI supports the Authorize button because the spec declares a Bearer JWT security scheme.
 
-API documentation is intentionally disabled in the default production-oriented configuration. The `local` profile enables it for development. CI starts the app with the local profile, exports `openapi.json` and `openapi.yaml`, uploads them as artifacts, and publishes a Redoc API reference under GitHub Pages.
+API documentation is intentionally disabled in the default production-oriented configuration. The `local` profile enables it for development. CI starts the app with the local profile, exports `openapi.json` and `openapi.yaml`, uploads them as artifacts, and publishes the generated specs under GitHub Pages.
 
 The documented contract focuses on the real BFF surface:
 
@@ -112,7 +112,6 @@ The documented contract focuses on the real BFF surface:
 - Javadoc with Java 21 doclint
 - Docker and Docker Compose
 - GitHub Actions and GitHub Pages
-- Redoc for static API reference publishing
 
 ## Project Structure
 
@@ -125,12 +124,10 @@ src/main/java/com/dani/bff
 |-- gateway   downstream WebClient clients and resilience boundary
 `-- service   dashboard aggregation orchestration
 
-.github/pages/index.html      GitHub Pages landing page template
-.github/pages/api/index.html  Redoc API documentation page template
+.github/pages/index.html      single maintained GitHub Pages landing page template
 .github/workflows/ci.yml      CI, artifact publishing, and Pages deployment
 docker/wiremock               Local mock user and product services
 scripts/create-local-jwt.ps1  Local HS256 JWT helper
-src/main/resources/static/swagger-ui.html  Local Swagger UI shell
 ```
 
 ## Run From IntelliJ
@@ -221,7 +218,7 @@ Local API documentation:
 | `BFF_JWT_ISSUER` | Optional expected JWT issuer | empty, set in Docker Compose |
 | `BFF_JWT_AUDIENCE` | Expected JWT audience | `react-dashboard` |
 | `SPRINGDOC_API_DOCS_ENABLED` | Enables OpenAPI JSON/YAML endpoints | `false`, enabled by `local` profile |
-| `BFF_SWAGGER_UI_ENABLED` | Enables the local Swagger UI shell in security config | `false`, enabled by `local` profile |
+| `SPRINGDOC_SWAGGER_UI_ENABLED` | Enables Springdoc Swagger UI | `false`, enabled by `local` profile |
 
 Decoder precedence is `BFF_JWT_JWK_SET_URI`, then `BFF_JWT_ISSUER_URI`, then local `BFF_JWT_SECRET`.
 
@@ -296,6 +293,10 @@ api/openapi.yaml
 
 The repository does not commit generated OpenAPI specs. The contract is generated from source annotations and the running application.
 
+## Mapping Strategy
+
+MapStruct is intentionally not used. The BFF has only two small downstream-to-frontend adapters, both with simple defaulting rules that are clearer as explicit record methods than as generated mapper code. If mapping complexity grows materially, revisit this decision with tests and keep generated mapper implementations under `target/generated-sources`.
+
 ## Javadoc
 
 Generate Javadoc locally:
@@ -326,7 +327,7 @@ The workflow:
 - starts the BFF with the local profile and exports OpenAPI JSON/YAML
 - uploads test reports on failure
 - uploads JaCoCo HTML, Javadoc, and OpenAPI specs as artifacts
-- assembles GitHub Pages content from generated reports, generated specs, `.github/pages/index.html`, and `.github/pages/api/index.html`
+- assembles GitHub Pages content from generated reports, generated specs, and `.github/pages/index.html`
 - deploys Pages only after successful pushes to `main`
 
 ## GitHub Pages
@@ -337,11 +338,12 @@ It includes:
 
 - portfolio-grade project overview
 - accessible architecture diagram
-- Redoc-rendered API documentation
 - downloadable OpenAPI JSON and YAML
 - local development and Docker instructions
 - testing, coverage, and documentation summary
 - links to the GitHub repository, Actions workflow, generated Javadoc, and JaCoCo coverage
+
+Only `.github/pages/index.html` is manually maintained. Javadoc, JaCoCo coverage, and OpenAPI specs are generated under `target` during Maven/CI execution and copied into the Pages artifact.
 
 Repository Pages settings should use GitHub Actions as the Pages source.
 
@@ -375,7 +377,7 @@ Java records and explicit configuration classes keep the build transparent witho
 
 - Backend for Frontend pattern for React applications
 - JWT-secured API boundary
-- OpenAPI 3 documentation with local Swagger UI and Pages-hosted Redoc
+- OpenAPI 3 documentation with local Springdoc Swagger UI and Pages-hosted specs
 - WebClient-based downstream aggregation
 - Resilience4j fallbacks with stable frontend contracts
 - Structured API errors

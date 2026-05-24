@@ -13,17 +13,19 @@ security:
     audience: ${BFF_JWT_AUDIENCE:react-dashboard}
     secret: ${BFF_JWT_SECRET:local-development-secret-change-me-at-least-32-bytes}
 
-bff:
-  documentation:
-    swagger-ui-enabled: ${BFF_SWAGGER_UI_ENABLED:false}
-
 springdoc:
   api-docs:
     enabled: ${SPRINGDOC_API_DOCS_ENABLED:false}
     path: /v3/api-docs
     version: openapi_3_0
   swagger-ui:
-    enabled: false
+    enabled: ${SPRINGDOC_SWAGGER_UI_ENABLED:false}
+    path: /swagger-ui.html
+    deep-linking: true
+    display-request-duration: true
+    operations-sorter: alpha
+    tags-sorter: alpha
+    persist-authorization: true
   packages-to-scan: com.dani.bff.api
   paths-to-match: /api/**
   show-actuator: false
