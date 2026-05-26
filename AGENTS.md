@@ -121,12 +121,17 @@ The workflow must:
 - run on pull requests
 - set up Java 21
 - cache Maven dependencies
-- run validation, tests, packaging, coverage, and Javadoc
+- run `mvn verify` as the main Maven lifecycle check for validation, tests, packaging, JaCoCo reports, and coverage gates
+- generate Javadoc after `verify`
 - export OpenAPI JSON/YAML from the running BFF
 - upload test reports on failure
 - upload JaCoCo, Javadoc, and OpenAPI artifacts
 - deploy GitHub Pages only from successful pushes to `main`
 - use current official GitHub Pages actions
+
+Keep the workflow simple: one build job for Maven checks and artifact preparation, plus one deploy job for GitHub Pages. Prefer Maven lifecycle behavior over duplicated shell steps, avoid matrix builds unless a real compatibility requirement appears, and do not add Docker image publishing or Compose runtime tests to CI without a clear reason. Keep the build job at repository read access and scope `contents: read`, `pages: write`, and `id-token: write` to the Pages deploy job.
+
+When updating CI, re-check the official action documentation and keep major versions current instead of copying old examples.
 
 Before changing Pages or Actions behavior, check current official GitHub documentation and avoid deprecated actions or warning-prone syntax.
 

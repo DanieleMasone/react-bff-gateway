@@ -321,8 +321,7 @@ Javadoc uses Java 21, English comments, and doclint with missing-comment enforce
 The workflow:
 
 - checks out the repository with `actions/checkout`
-- sets up Java 21 with `actions/setup-java` and Maven caching
-- runs Maven `validate`
+- sets up Java 21 with `actions/setup-java` and Maven dependency caching
 - runs `verify`, including tests, packaging, JaCoCo report generation, and coverage checks
 - generates Javadoc
 - starts the BFF with the local profile and exports OpenAPI JSON/YAML plus static Swagger UI assets
@@ -330,6 +329,12 @@ The workflow:
 - uploads JaCoCo HTML, Javadoc, and OpenAPI specs as artifacts
 - assembles GitHub Pages content from generated reports, generated specs, and `.github/pages/index.html`
 - deploys Pages only after successful pushes to `main`
+
+The workflow intentionally uses one build job and one deploy job. Pull requests run the same build, test, coverage, Javadoc, and OpenAPI export checks but never deploy Pages. GitHub Pages deployment permissions are scoped to the deploy job; the build job only needs repository read access.
+
+Current official action majors are used for checkout, Java setup, artifact upload, Pages artifact upload, and Pages deployment.
+
+Docker image publishing and full Compose runtime tests are not part of CI because the Maven test suite already validates the BFF behavior and HTTP boundaries. Docker remains documented and supported as the local development runtime.
 
 ## GitHub Pages
 
