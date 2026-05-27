@@ -1,7 +1,5 @@
 # React BFF Gateway
 
-# React BFF Gateway
-
 ![CI](https://github.com/danielemasone/react-bff-gateway/actions/workflows/ci.yml/badge.svg)
 [![GitHub Pages](https://img.shields.io/badge/GitHub%20Pages-online-121013?logo=github)](https://danielemasone.github.io/react-bff-gateway/)
 ![Java](https://img.shields.io/badge/Java-21-007396?logo=openjdk)
