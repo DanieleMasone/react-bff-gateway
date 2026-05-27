@@ -1,8 +1,27 @@
 # React BFF Gateway
 
+# React BFF Gateway
+
+![CI](https://github.com/danielemasone/react-bff-gateway/actions/workflows/ci.yml/badge.svg)
+[![GitHub Pages](https://img.shields.io/badge/GitHub%20Pages-online-121013?logo=github)](https://danielemasone.github.io/react-bff-gateway/)
+![Java](https://img.shields.io/badge/Java-21-007396?logo=openjdk)
+![Spring Boot](https://img.shields.io/badge/Spring%20Boot-3.5.x-6DB33F?logo=springboot)
+![OpenAPI](https://img.shields.io/badge/OpenAPI-3-6BA539?logo=openapiinitiative)
+![Coverage](https://img.shields.io/badge/Coverage-JaCoCo-informational)
+[![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+
 Production-oriented Backend for Frontend (BFF) for a React dashboard, built with Java 21, Spring Boot WebFlux, WebClient, JWT Resource Server security, Resilience4j, OpenAPI 3, Docker, JaCoCo, Javadoc, GitHub Actions, and GitHub Pages.
 
 The project gives a React frontend one stable API while the BFF owns authentication, downstream aggregation, response adaptation, resilience, and operational concerns.
+
+## Live Documentation
+
+- GitHub Pages: `https://danielemasone.github.io/react-bff-gateway/`
+- Javadoc: `https://danielemasone.github.io/react-bff-gateway/javadoc/`
+- Coverage: `https://danielemasone.github.io/react-bff-gateway/coverage/`
+- Swagger UI: `https://danielemasone.github.io/react-bff-gateway/swagger-ui/`
+- OpenAPI JSON: `https://danielemasone.github.io/react-bff-gateway/api/openapi.json`
+- OpenAPI YAML: `https://danielemasone.github.io/react-bff-gateway/api/openapi.yaml`
 
 ## Architecture
 
