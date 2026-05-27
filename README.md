@@ -14,12 +14,12 @@ The project gives a React frontend one stable API while the BFF owns authenticat
 
 ## Live Documentation
 
-- GitHub Pages: `https://danielemasone.github.io/react-bff-gateway/`
-- Javadoc: `https://danielemasone.github.io/react-bff-gateway/javadoc/`
-- Coverage: `https://danielemasone.github.io/react-bff-gateway/coverage/`
-- Swagger UI: `https://danielemasone.github.io/react-bff-gateway/swagger-ui/`
-- OpenAPI JSON: `https://danielemasone.github.io/react-bff-gateway/api/openapi.json`
-- OpenAPI YAML: `https://danielemasone.github.io/react-bff-gateway/api/openapi.yaml`
+- [GitHub Pages](https://danielemasone.github.io/react-bff-gateway/)
+- [Javadoc](https://danielemasone.github.io/react-bff-gateway/javadoc/)
+- [Coverage Report](https://danielemasone.github.io/react-bff-gateway/coverage/)
+- [Swagger UI](https://danielemasone.github.io/react-bff-gateway/swagger-ui/)
+- [OpenAPI JSON](https://danielemasone.github.io/react-bff-gateway/api/openapi.json)
+- [OpenAPI YAML](https://danielemasone.github.io/react-bff-gateway/api/openapi.yaml)
 
 ## Architecture
 
