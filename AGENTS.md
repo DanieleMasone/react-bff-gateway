@@ -143,6 +143,17 @@ CI copies generated Javadoc to `target/pages/javadoc`, generated JaCoCo coverage
 
 Keep the Pages template accessible, responsive, lightweight, and useful as portfolio documentation. Avoid frontend build chains and duplicated manually maintained documentation pages.
 
+## Documentation Policy
+
+Keep the documentation set intentionally small:
+
+- `README.md` is the GitHub entry point and portfolio overview.
+- `docs/user-guide.md` contains operational instructions for local running, Docker, JWTs, Swagger UI, OpenAPI, generated reports, and troubleshooting.
+- `AGENTS.md` guides future AI and human contributors.
+- `.github/pages/index.html` is the only manually maintained GitHub Pages HTML file.
+
+Avoid documentation sprawl. Do not add MkDocs, Docusaurus, static-site generators, duplicate guides, or additional manually maintained Pages HTML files without a clear technical reason. Keep README concise, keep the User Guide practical, and keep the landing page focused on portfolio navigation and generated documentation links.
+
 ## Docker Expectations
 
 `Dockerfile` builds a production-style runtime image with Java 21.
