@@ -15,7 +15,7 @@ Production-oriented Backend for Frontend (BFF) for a React dashboard. The BFF ex
 - [User Guide](https://danielemasone.github.io/react-bff-gateway/user-guide/)
 - [Javadoc](https://danielemasone.github.io/react-bff-gateway/javadoc/)
 - [JaCoCo coverage](https://danielemasone.github.io/react-bff-gateway/coverage/)
-- [Published Swagger UI](https://danielemasone.github.io/react-bff-gateway/swagger-ui/)
+- [Published Swagger UI (read-only)](https://danielemasone.github.io/react-bff-gateway/swagger-ui/)
 - [OpenAPI JSON](https://danielemasone.github.io/react-bff-gateway/api/openapi.json)
 - [OpenAPI YAML](https://danielemasone.github.io/react-bff-gateway/api/openapi.yaml)
 
@@ -78,7 +78,7 @@ Example response:
 - `/actuator/health` and `/actuator/health/**` are public.
 - Every other route is denied by default.
 - Authentication and access-denied failures return structured JSON `ApiError` payloads.
-- Local development can use the included HS256 helper script; production-style deployments should use `BFF_JWT_JWK_SET_URI` or `BFF_JWT_ISSUER_URI`.
+- The base profile contains no signing secret. The `local` profile supplies a documented development-only HS256 secret for the included token helper; production-style deployments should use `BFF_JWT_JWK_SET_URI` or `BFF_JWT_ISSUER_URI`.
 - OpenAPI JSON/YAML and Swagger UI are disabled by default and enabled intentionally in the `local` profile.
 
 ## Resilience Summary

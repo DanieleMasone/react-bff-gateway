@@ -11,7 +11,7 @@ security:
     jwk-set-uri: ${BFF_JWT_JWK_SET_URI:}
     issuer: ${BFF_JWT_ISSUER:}
     audience: ${BFF_JWT_AUDIENCE:react-dashboard}
-    secret: ${BFF_JWT_SECRET:local-development-secret-change-me-at-least-32-bytes}
+    secret: ${BFF_JWT_SECRET:}
 
 springdoc:
   api-docs:

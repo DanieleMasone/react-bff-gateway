@@ -44,6 +44,7 @@ Do not split the project into fake microservices. The downstream user and produc
 - OpenAPI JSON/YAML and Swagger UI must stay disabled by default and enabled intentionally for local/docs generation.
 - Authentication and authorization failures must return structured JSON `ApiError` bodies.
 - JWT decoder precedence is JWK set URI, issuer URI, then local HMAC secret.
+- The base profile must not embed a signing secret; development defaults belong only in the `local` profile.
 - Tests must not require a real identity provider.
 - Do not weaken security defaults without a clear reason and updated tests.
 
@@ -105,7 +106,7 @@ Expectations:
 - Do not enable docs publicly by default in production-oriented configuration.
 - Generated `openapi.json` and `openapi.yaml` belong under `target/openapi` or the CI Pages artifact, not in source control.
 
-Swagger UI is a local development aid at `/swagger-ui.html` when documentation is enabled. It must be provided by Springdoc dependency/configuration, not by a custom committed HTML page. CI may publish generated static Swagger UI output under `target/pages/swagger-ui`, but that output must be assembled from the running Springdoc UI assets and generated OpenAPI spec, not committed as source.
+Swagger UI is a local development aid at `/swagger-ui.html` when documentation is enabled. It must be provided by Springdoc dependency/configuration, not by a custom committed HTML page. CI may publish generated static Swagger UI output under `target/pages/swagger-ui`, but that output must be assembled from the running Springdoc UI assets and generated OpenAPI spec, not committed as source. Keep the Pages-hosted UI read-only because GitHub Pages cannot host the BFF runtime; interactive requests belong in the local UI.
 
 ## Mapping Strategy
 

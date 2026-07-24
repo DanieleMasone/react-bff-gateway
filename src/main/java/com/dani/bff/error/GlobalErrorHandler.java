@@ -38,8 +38,8 @@ public class GlobalErrorHandler {
         return error(status, exception.getReason() != null ? exception.getReason() : status.getReasonPhrase(), exchange);
     }
 
-    @ExceptionHandler(Throwable.class)
-    public ResponseEntity<ApiError> handleUnexpected(Throwable exception, ServerWebExchange exchange) {
+    @ExceptionHandler(Exception.class)
+    public ResponseEntity<ApiError> handleUnexpected(Exception exception, ServerWebExchange exchange) {
         log.error("Unexpected BFF failure", exception);
         return error(HttpStatus.INTERNAL_SERVER_ERROR, "The BFF could not complete the request", exchange);
     }

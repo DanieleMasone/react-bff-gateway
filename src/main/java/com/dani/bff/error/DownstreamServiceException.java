@@ -3,7 +3,7 @@ package com.dani.bff.error;
 import org.springframework.http.HttpStatusCode;
 
 /**
- * Signals that a downstream HTTP service returned an unsuccessful response.
+ * Signals that a downstream HTTP service did not provide a usable response.
  */
 public class DownstreamServiceException extends RuntimeException {
 

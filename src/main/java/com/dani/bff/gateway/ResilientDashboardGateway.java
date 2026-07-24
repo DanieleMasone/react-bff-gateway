@@ -2,11 +2,16 @@ package com.dani.bff.gateway;
 
 import com.dani.bff.dto.ProductRecommendation;
 import com.dani.bff.dto.UserProfile;
+import com.dani.bff.error.DownstreamServiceException;
+import io.github.resilience4j.circuitbreaker.CallNotPermittedException;
 import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
 import java.util.List;
+import java.util.concurrent.TimeoutException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.core.codec.DecodingException;
 import org.springframework.stereotype.Component;
+import org.springframework.web.reactive.function.client.WebClientException;
 import reactor.core.publisher.Mono;
 
 /**
@@ -48,12 +53,26 @@ public class ResilientDashboardGateway {
     }
 
     Mono<UserProfile> fallbackUserProfile(String userId, Throwable cause) {
+        if (!isRecoverableDownstreamFailure(cause)) {
+            return Mono.error(cause);
+        }
         log.warn("Using user profile fallback for userId={} because {}", userId, cause.toString());
         return Mono.just(UserProfile.unavailable(userId));
     }
 
     Mono<List<ProductRecommendation>> fallbackRecommendedProducts(String userId, Throwable cause) {
+        if (!isRecoverableDownstreamFailure(cause)) {
+            return Mono.error(cause);
+        }
         log.warn("Using product recommendations fallback for userId={} because {}", userId, cause.toString());
         return Mono.just(List.of());
+    }
+
+    private static boolean isRecoverableDownstreamFailure(Throwable cause) {
+        return cause instanceof DownstreamServiceException
+                || cause instanceof WebClientException
+                || cause instanceof DecodingException
+                || cause instanceof TimeoutException
+                || cause instanceof CallNotPermittedException;
     }
 }

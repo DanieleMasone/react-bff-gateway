@@ -90,6 +90,7 @@ jobs:
               deepLinking: true,
               displayRequestDuration: true,
               persistAuthorization: true,
+              supportedSubmitMethods: [],
               operationsSorter: "alpha",
               tagsSorter: "alpha",
               presets: [

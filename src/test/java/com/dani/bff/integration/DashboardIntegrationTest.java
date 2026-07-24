@@ -101,6 +101,22 @@ class DashboardIntegrationTest {
     }
 
     @Test
+    void dashboardUsesUserFallbackWhenSuccessfulResponseHasNoBody() {
+        userServer.enqueue(new MockResponse().setResponseCode(200));
+        productServer.enqueue(jsonResponse("[]"));
+
+        webTestClient.mutateWith(mockJwt().jwt(jwt -> jwt.subject("user-123")))
+                .get()
+                .uri("/api/dashboard")
+                .exchange()
+                .expectStatus().isOk()
+                .expectBody()
+                .jsonPath("$.user.id").isEqualTo("user-123")
+                .jsonPath("$.user.displayName").isEqualTo("Guest User")
+                .jsonPath("$.recommendedProducts").isEmpty();
+    }
+
+    @Test
     void userCircuitBreakerOpensAfterRepeatedFailuresAndShortCircuitsCalls() {
         userServer.enqueue(new MockResponse().setResponseCode(503).setBody("first failure"));
         userServer.enqueue(new MockResponse().setResponseCode(503).setBody("second failure"));

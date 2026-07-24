@@ -73,7 +73,7 @@
         <p>Use the Authorize button with the local JWT token, then call <code>GET /api/dashboard</code>.</p>
         <div class="callout">
           <strong>Published API docs</strong>
-          <p>The Pages-hosted Swagger UI is generated from Springdoc assets during CI and reads <code>../api/openapi.json</code>.</p>
+          <p>The Pages-hosted Swagger UI is a read-only contract viewer generated from Springdoc assets during CI. GitHub Pages cannot run the BFF; use the local UI for authenticated requests.</p>
         </div>
         <div class="actions">
           <a class="button primary" href="../swagger-ui/">Open Published Swagger UI</a>
@@ -135,8 +135,8 @@ Invoke-WebRequest -UseBasicParsing http://localhost:8080/v3/api-docs.yaml -OutFi
               <tr><td><code>PRODUCT_SERVICE_TIMEOUT</code></td><td>Product service timeout</td><td><code>2s</code></td></tr>
               <tr><td><code>BFF_JWT_JWK_SET_URI</code></td><td>JWK set URL for production-style JWT validation</td><td>empty</td></tr>
               <tr><td><code>BFF_JWT_ISSUER_URI</code></td><td>OIDC issuer discovery URL for production-style JWT validation</td><td>empty</td></tr>
-              <tr><td><code>BFF_JWT_SECRET</code></td><td>Local HS256 secret when no JWK or issuer URI is supplied</td><td>local development secret</td></tr>
-              <tr><td><code>BFF_JWT_ISSUER</code></td><td>Optional expected JWT issuer</td><td>empty, set in Docker Compose</td></tr>
+              <tr><td><code>BFF_JWT_SECRET</code></td><td>HS256 secret when no JWK or issuer URI is supplied</td><td>empty; the <code>local</code> profile supplies a development-only value</td></tr>
+              <tr><td><code>BFF_JWT_ISSUER</code></td><td>Optional expected JWT issuer</td><td>empty; the <code>local</code> profile uses <code>react-bff-gateway-local</code></td></tr>
               <tr><td><code>BFF_JWT_AUDIENCE</code></td><td>Expected JWT audience</td><td><code>react-dashboard</code></td></tr>
               <tr><td><code>SPRINGDOC_API_DOCS_ENABLED</code></td><td>Enables OpenAPI JSON/YAML endpoints</td><td><code>false</code>, enabled by <code>local</code></td></tr>
               <tr><td><code>SPRINGDOC_SWAGGER_UI_ENABLED</code></td><td>Enables Springdoc Swagger UI</td><td><code>false</code>, enabled by <code>local</code></td></tr>

@@ -2,6 +2,11 @@ logging:
   level:
     com.dani.bff: DEBUG
 
+security:
+  jwt:
+    issuer: ${BFF_JWT_ISSUER:react-bff-gateway-local}
+    secret: ${BFF_JWT_SECRET:local-development-secret-change-me-at-least-32-bytes}
+
 springdoc:
   api-docs:
     enabled: true
