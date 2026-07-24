@@ -1,0 +1,173 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light dark">
+  <meta name="description" content="Testing, coverage, Javadoc, GitHub Pages artifacts, and troubleshooting for React BFF Gateway.">
+  <title>Quality and Troubleshooting - React BFF Gateway</title>
+  <link rel="stylesheet" href="../assets/styles.css">
+  <script src="../assets/theme.js" defer></script>
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to content</a>
+  <header class="site-header">
+    <nav class="nav" aria-label="Primary navigation">
+      <a class="brand" href="../" aria-label="React BFF Gateway home">
+        <span class="brand-mark" aria-hidden="true">BFF</span>
+        <span>React BFF Gateway</span>
+      </a>
+      <div class="nav-links" aria-label="Primary links">
+        <a href="../">Overview</a>
+        <a href="./" aria-current="page">User Guide</a>
+        <a href="../swagger-ui/">Swagger UI</a>
+        <a href="../javadoc/">Javadoc</a>
+        <a href="../coverage/">Coverage</a>
+      </div>
+      <div class="nav-actions">
+        <button class="theme-toggle" type="button" data-theme-toggle aria-label="Switch color theme" aria-pressed="false">
+          <span class="theme-icon" aria-hidden="true">Dark</span>
+          <span class="theme-label">Theme</span>
+        </button>
+        <details class="mobile-menu">
+          <summary>Menu</summary>
+          <div class="mobile-panel">
+            <a href="../">Overview</a>
+            <a href="./">Guide Overview</a>
+            <a href="./getting-started.html">Getting Started</a>
+            <a href="./api-and-security.html">API and Security</a>
+            <a href="./quality-and-troubleshooting.html" aria-current="page">Quality and Troubleshooting</a>
+            <a href="../swagger-ui/">Swagger UI</a>
+            <a href="../javadoc/">Javadoc</a>
+            <a href="../coverage/">Coverage</a>
+          </div>
+        </details>
+      </div>
+    </nav>
+  </header>
+
+  <main id="main" class="page-main guide-shell">
+    <aside class="guide-sidebar" aria-label="User Guide navigation">
+      <h2>User Guide</h2>
+      <nav class="guide-nav">
+        <a href="./">Overview</a>
+        <a href="./getting-started.html">Getting Started</a>
+        <a href="./api-and-security.html">API and Security</a>
+        <a href="./quality-and-troubleshooting.html" aria-current="page">Quality and Troubleshooting</a>
+      </nav>
+    </aside>
+
+    <article class="guide-content">
+      <header class="guide-header">
+        <p class="eyebrow">Quality and Troubleshooting</p>
+        <h1>Validate behavior and inspect generated documentation.</h1>
+        <p class="lede">
+          The project uses Maven verification, JaCoCo, Javadoc, OpenAPI export, and GitHub Pages assembly as its main quality path.
+        </p>
+      </header>
+
+      <section class="doc-section" aria-labelledby="testing-title">
+        <h2 id="testing-title">Testing</h2>
+        <p>Run the full verification build:</p>
+        <pre class="code-block"><code>./mvnw clean verify</code></pre>
+        <p>The test suite covers:</p>
+        <ul>
+          <li>authenticated dashboard access and unauthenticated rejection</li>
+          <li>public health endpoint access and denied-by-default behavior</li>
+          <li>OpenAPI JSON/YAML generation and Bearer JWT metadata</li>
+          <li>local Swagger UI availability when documentation is enabled</li>
+          <li>dashboard aggregation and downstream success/failure behavior</li>
+          <li>circuit-breaker open-state behavior</li>
+          <li>DTO serialization and structured error responses</li>
+          <li>package boundaries with ArchUnit</li>
+        </ul>
+        <p>Testcontainers is intentionally not used because the project has no database, broker, or containerized external dependency where it would add useful signal.</p>
+      </section>
+
+      <section class="doc-section" aria-labelledby="coverage-title">
+        <h2 id="coverage-title">Coverage</h2>
+        <p>JaCoCo runs during <code>verify</code> and writes HTML to:</p>
+        <pre class="code-block"><code>target/site/jacoco/index.html</code></pre>
+        <p>Current bundle gates:</p>
+        <ul>
+          <li>instruction coverage: 70%</li>
+          <li>branch coverage: 50%</li>
+        </ul>
+        <p>Generated coverage artifacts are ignored and must not be committed.</p>
+        <div class="actions">
+          <a class="button" href="../coverage/">Open Published Coverage</a>
+        </div>
+      </section>
+
+      <section class="doc-section" aria-labelledby="javadoc-title">
+        <h2 id="javadoc-title">Javadoc</h2>
+        <p>Generate Javadoc locally:</p>
+        <pre class="code-block"><code>./mvnw javadoc:javadoc</code></pre>
+        <p>Open the generated output:</p>
+        <pre class="code-block"><code>target/site/apidocs/index.html</code></pre>
+        <p>Javadoc is also generated in CI and published to GitHub Pages.</p>
+        <div class="actions">
+          <a class="button" href="../javadoc/">Open Published Javadoc</a>
+        </div>
+      </section>
+
+      <section class="doc-section" aria-labelledby="pages-title">
+        <h2 id="pages-title">GitHub Pages Artifact Structure</h2>
+        <p>CI assembles Pages content under <code>target/pages</code> before upload and deployment.</p>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th scope="col">Route</th>
+                <th scope="col">Source</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr><td><code>/</code></td><td>Landing page from <code>.github/pages/index.html</code></td></tr>
+              <tr><td><code>/user-guide/</code></td><td>HTML User Guide from <code>.github/pages/user-guide/</code></td></tr>
+              <tr><td><code>/javadoc/</code></td><td>Generated Javadoc from <code>target/site/apidocs</code></td></tr>
+              <tr><td><code>/coverage/</code></td><td>Generated JaCoCo report from <code>target/site/jacoco</code></td></tr>
+              <tr><td><code>/api/openapi.json</code></td><td>Generated OpenAPI JSON from the running BFF</td></tr>
+              <tr><td><code>/api/openapi.yaml</code></td><td>Generated OpenAPI YAML from the running BFF</td></tr>
+              <tr><td><code>/swagger-ui/</code></td><td>Generated static Swagger UI assets assembled from Springdoc</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p>Generated Pages artifacts are not committed.</p>
+      </section>
+
+      <section class="doc-section" aria-labelledby="troubleshooting-title">
+        <h2 id="troubleshooting-title">Troubleshooting</h2>
+        <h3>Dashboard returns 401</h3>
+        <p>Generate a new token with <code>scripts/create-local-jwt.ps1</code>. Confirm the app uses the <code>local</code> profile or matching <code>BFF_JWT_SECRET</code>, <code>BFF_JWT_ISSUER</code>, and <code>BFF_JWT_AUDIENCE</code> values.</p>
+
+        <h3>Dashboard returns an empty product list</h3>
+        <p>Check whether the product service is running on <code>http://localhost:8082</code> or whether the Compose service <code>product-service</code> is healthy. The BFF intentionally falls back to an empty recommendation list when product calls fail.</p>
+
+        <h3>Dashboard returns Guest User</h3>
+        <p>Check whether the user service is running on <code>http://localhost:8081</code> or whether the Compose service <code>user-service</code> is healthy. The BFF intentionally falls back to a safe placeholder user when user calls fail.</p>
+
+        <h3>Swagger UI is unavailable</h3>
+        <p>Swagger UI is disabled in the default profile. Run with <code>SPRING_PROFILES_ACTIVE=local</code> or set <code>SPRINGDOC_SWAGGER_UI_ENABLED=true</code>.</p>
+
+        <h3>OpenAPI endpoints are unavailable</h3>
+        <p>OpenAPI endpoints are disabled in the default profile. Run with <code>SPRING_PROFILES_ACTIVE=local</code> or set <code>SPRINGDOC_API_DOCS_ENABLED=true</code>.</p>
+
+        <h3>Port 8080, 8081, or 8082 is already in use</h3>
+        <p>Stop the process using the port, or adjust Compose port mappings and matching downstream base URL environment variables.</p>
+      </section>
+
+      <nav class="pagination" aria-label="Guide pagination">
+        <a class="button" href="./api-and-security.html">Previous: API and Security</a>
+        <span></span>
+      </nav>
+    </article>
+  </main>
+
+  <footer class="site-footer">
+    <div class="footer-inner">
+      User Guide for React BFF Gateway.
+    </div>
+  </footer>
+</body>
+</html>

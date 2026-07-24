@@ -1,0 +1,161 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light dark">
+  <meta name="description" content="Swagger UI, OpenAPI, JWT security, configuration, and resilience behavior for React BFF Gateway.">
+  <title>API and Security - React BFF Gateway</title>
+  <link rel="stylesheet" href="../assets/styles.css">
+  <script src="../assets/theme.js" defer></script>
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to content</a>
+  <header class="site-header">
+    <nav class="nav" aria-label="Primary navigation">
+      <a class="brand" href="../" aria-label="React BFF Gateway home">
+        <span class="brand-mark" aria-hidden="true">BFF</span>
+        <span>React BFF Gateway</span>
+      </a>
+      <div class="nav-links" aria-label="Primary links">
+        <a href="../">Overview</a>
+        <a href="./" aria-current="page">User Guide</a>
+        <a href="../swagger-ui/">Swagger UI</a>
+        <a href="../javadoc/">Javadoc</a>
+        <a href="../coverage/">Coverage</a>
+      </div>
+      <div class="nav-actions">
+        <button class="theme-toggle" type="button" data-theme-toggle aria-label="Switch color theme" aria-pressed="false">
+          <span class="theme-icon" aria-hidden="true">Dark</span>
+          <span class="theme-label">Theme</span>
+        </button>
+        <details class="mobile-menu">
+          <summary>Menu</summary>
+          <div class="mobile-panel">
+            <a href="../">Overview</a>
+            <a href="./">Guide Overview</a>
+            <a href="./getting-started.html">Getting Started</a>
+            <a href="./api-and-security.html" aria-current="page">API and Security</a>
+            <a href="./quality-and-troubleshooting.html">Quality and Troubleshooting</a>
+            <a href="../swagger-ui/">Swagger UI</a>
+            <a href="../javadoc/">Javadoc</a>
+            <a href="../coverage/">Coverage</a>
+          </div>
+        </details>
+      </div>
+    </nav>
+  </header>
+
+  <main id="main" class="page-main guide-shell">
+    <aside class="guide-sidebar" aria-label="User Guide navigation">
+      <h2>User Guide</h2>
+      <nav class="guide-nav">
+        <a href="./">Overview</a>
+        <a href="./getting-started.html">Getting Started</a>
+        <a href="./api-and-security.html" aria-current="page">API and Security</a>
+        <a href="./quality-and-troubleshooting.html">Quality and Troubleshooting</a>
+      </nav>
+    </aside>
+
+    <article class="guide-content">
+      <header class="guide-header">
+        <p class="eyebrow">API and Security</p>
+        <h1>Explore the API contract and security model.</h1>
+        <p class="lede">
+          The BFF documents its real React-facing API through Springdoc OpenAPI and protects runtime endpoints with JWT Resource Server security.
+        </p>
+      </header>
+
+      <section class="doc-section" aria-labelledby="swagger-title">
+        <h2 id="swagger-title">Swagger UI</h2>
+        <p>Swagger UI is available when documentation is enabled. The <code>local</code> profile enables it automatically:</p>
+        <pre class="code-block"><code>http://localhost:8080/swagger-ui.html</code></pre>
+        <p>Use the Authorize button with the local JWT token, then call <code>GET /api/dashboard</code>.</p>
+        <div class="callout">
+          <strong>Published API docs</strong>
+          <p>The Pages-hosted Swagger UI is generated from Springdoc assets during CI and reads <code>../api/openapi.json</code>.</p>
+        </div>
+        <div class="actions">
+          <a class="button primary" href="../swagger-ui/">Open Published Swagger UI</a>
+          <a class="button" href="../api/openapi.json">OpenAPI JSON</a>
+          <a class="button" href="../api/openapi.yaml">OpenAPI YAML</a>
+        </div>
+      </section>
+
+      <section class="doc-section" aria-labelledby="openapi-title">
+        <h2 id="openapi-title">OpenAPI JSON and YAML</h2>
+        <p>Local endpoints:</p>
+        <pre class="code-block"><code>http://localhost:8080/v3/api-docs
+http://localhost:8080/v3/api-docs.yaml</code></pre>
+        <p>Manual export:</p>
+        <pre class="code-block"><code>New-Item -ItemType Directory -Force -Path target\openapi | Out-Null
+Invoke-WebRequest -UseBasicParsing http://localhost:8080/v3/api-docs -OutFile target\openapi\openapi.json
+Invoke-WebRequest -UseBasicParsing http://localhost:8080/v3/api-docs.yaml -OutFile target\openapi\openapi.yaml</code></pre>
+        <p>Generated OpenAPI files belong under <code>target</code> or CI artifacts, not source control.</p>
+      </section>
+
+      <section class="doc-section" aria-labelledby="security-title">
+        <h2 id="security-title">Security Behavior</h2>
+        <ul>
+          <li><code>/api/**</code> requires a valid JWT.</li>
+          <li><code>/actuator/health</code> and <code>/actuator/health/**</code> are public.</li>
+          <li>All other routes are denied by default.</li>
+          <li>Authentication and access-denied failures return structured JSON <code>ApiError</code> payloads.</li>
+          <li>OpenAPI JSON/YAML and Swagger UI are disabled by default and enabled intentionally in the <code>local</code> profile.</li>
+        </ul>
+        <p>JWT decoder precedence is JWK set URI, then issuer URI, then local HMAC secret.</p>
+      </section>
+
+      <section class="doc-section" aria-labelledby="resilience-title">
+        <h2 id="resilience-title">Resilience and Fallback Behavior</h2>
+        <ul>
+          <li>User service failure returns a safe <code>Guest User</code> profile for the authenticated subject.</li>
+          <li>Product service failure returns an empty recommendation list.</li>
+          <li>Circuit breakers are registered with Actuator health.</li>
+          <li>The frontend receives a stable dashboard response shape even when downstream services fail.</li>
+        </ul>
+      </section>
+
+      <section class="doc-section" aria-labelledby="config-title">
+        <h2 id="config-title">Configuration</h2>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th scope="col">Variable</th>
+                <th scope="col">Purpose</th>
+                <th scope="col">Default</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr><td><code>SERVER_PORT</code></td><td>BFF HTTP port</td><td><code>8080</code></td></tr>
+              <tr><td><code>USER_SERVICE_BASE_URL</code></td><td>User service base URL</td><td><code>http://localhost:8081</code></td></tr>
+              <tr><td><code>PRODUCT_SERVICE_BASE_URL</code></td><td>Product service base URL</td><td><code>http://localhost:8082</code></td></tr>
+              <tr><td><code>USER_SERVICE_TIMEOUT</code></td><td>User service timeout</td><td><code>2s</code></td></tr>
+              <tr><td><code>PRODUCT_SERVICE_TIMEOUT</code></td><td>Product service timeout</td><td><code>2s</code></td></tr>
+              <tr><td><code>BFF_JWT_JWK_SET_URI</code></td><td>JWK set URL for production-style JWT validation</td><td>empty</td></tr>
+              <tr><td><code>BFF_JWT_ISSUER_URI</code></td><td>OIDC issuer discovery URL for production-style JWT validation</td><td>empty</td></tr>
+              <tr><td><code>BFF_JWT_SECRET</code></td><td>Local HS256 secret when no JWK or issuer URI is supplied</td><td>local development secret</td></tr>
+              <tr><td><code>BFF_JWT_ISSUER</code></td><td>Optional expected JWT issuer</td><td>empty, set in Docker Compose</td></tr>
+              <tr><td><code>BFF_JWT_AUDIENCE</code></td><td>Expected JWT audience</td><td><code>react-dashboard</code></td></tr>
+              <tr><td><code>SPRINGDOC_API_DOCS_ENABLED</code></td><td>Enables OpenAPI JSON/YAML endpoints</td><td><code>false</code>, enabled by <code>local</code></td></tr>
+              <tr><td><code>SPRINGDOC_SWAGGER_UI_ENABLED</code></td><td>Enables Springdoc Swagger UI</td><td><code>false</code>, enabled by <code>local</code></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <nav class="pagination" aria-label="Guide pagination">
+        <a class="button" href="./getting-started.html">Previous: Getting Started</a>
+        <a class="button primary" href="./quality-and-troubleshooting.html">Next: Quality and Troubleshooting</a>
+      </nav>
+    </article>
+  </main>
+
+  <footer class="site-footer">
+    <div class="footer-inner">
+      User Guide for React BFF Gateway.
+    </div>
+  </footer>
+</body>
+</html>

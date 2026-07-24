@@ -1,0 +1,149 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light dark">
+  <meta name="description" content="User Guide overview for running and evaluating React BFF Gateway.">
+  <title>User Guide - React BFF Gateway</title>
+  <link rel="stylesheet" href="../assets/styles.css">
+  <script src="../assets/theme.js" defer></script>
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to content</a>
+  <header class="site-header">
+    <nav class="nav" aria-label="Primary navigation">
+      <a class="brand" href="../" aria-label="React BFF Gateway home">
+        <span class="brand-mark" aria-hidden="true">BFF</span>
+        <span>React BFF Gateway</span>
+      </a>
+      <div class="nav-links" aria-label="Primary links">
+        <a href="../">Overview</a>
+        <a href="./" aria-current="page">User Guide</a>
+        <a href="../swagger-ui/">Swagger UI</a>
+        <a href="../javadoc/">Javadoc</a>
+        <a href="../coverage/">Coverage</a>
+      </div>
+      <div class="nav-actions">
+        <button class="theme-toggle" type="button" data-theme-toggle aria-label="Switch color theme" aria-pressed="false">
+          <span class="theme-icon" aria-hidden="true">Dark</span>
+          <span class="theme-label">Theme</span>
+        </button>
+        <details class="mobile-menu">
+          <summary>Menu</summary>
+          <div class="mobile-panel">
+            <a href="../">Overview</a>
+            <a href="./" aria-current="page">Guide Overview</a>
+            <a href="./getting-started.html">Getting Started</a>
+            <a href="./api-and-security.html">API and Security</a>
+            <a href="./quality-and-troubleshooting.html">Quality and Troubleshooting</a>
+            <a href="../swagger-ui/">Swagger UI</a>
+            <a href="../javadoc/">Javadoc</a>
+            <a href="../coverage/">Coverage</a>
+          </div>
+        </details>
+      </div>
+    </nav>
+  </header>
+
+  <main id="main" class="page-main guide-shell">
+    <aside class="guide-sidebar" aria-label="User Guide navigation">
+      <h2>User Guide</h2>
+      <nav class="guide-nav">
+        <a href="./" aria-current="page">Overview</a>
+        <a href="./getting-started.html">Getting Started</a>
+        <a href="./api-and-security.html">API and Security</a>
+        <a href="./quality-and-troubleshooting.html">Quality and Troubleshooting</a>
+      </nav>
+    </aside>
+
+    <article class="guide-content">
+      <header class="guide-header">
+        <p class="eyebrow">User Guide</p>
+        <h1>Operate the BFF locally and navigate the generated docs.</h1>
+        <p class="lede">
+          This guide covers local startup, JWT usage, API exploration, generated documentation,
+          and troubleshooting for the Spring Boot WebFlux Backend for Frontend.
+        </p>
+      </header>
+
+      <section class="doc-section" aria-labelledby="scope-title">
+        <h2 id="scope-title">Purpose</h2>
+        <p>
+          The README is the concise GitHub entry point. This User Guide is the operational reference for
+          engineers who want to run the application, call the API, inspect the generated contract, and
+          understand the local development workflow.
+        </p>
+        <div class="callout">
+          <strong>Documentation source strategy</strong>
+          <p>
+            The guide is maintained as direct HTML source under <code>.github/pages/user-guide/</code>.
+            CI assembles it into <code>target/pages/user-guide/</code> with the rest of the Pages artifact.
+            This avoids a Markdown conversion pipeline while keeping the published guide accessible and controlled.
+          </p>
+        </div>
+      </section>
+
+      <section class="doc-section" aria-labelledby="prerequisites-title">
+        <h2 id="prerequisites-title">Prerequisites</h2>
+        <div class="card-grid two">
+          <article class="doc-card">
+            <strong>Required runtime</strong>
+            <p>Java 21, the Maven Wrapper from this repository, Docker, and Docker Compose.</p>
+          </article>
+          <article class="doc-card">
+            <strong>Optional IDE</strong>
+            <p>IntelliJ IDEA is useful for local debugging, but it is not required for the Maven or Docker workflows.</p>
+          </article>
+        </div>
+      </section>
+
+      <section class="doc-section" aria-labelledby="map-title">
+        <h2 id="map-title">Guide Map</h2>
+        <div class="card-grid two">
+          <article class="doc-card">
+            <strong><a href="./getting-started.html">Getting Started</a></strong>
+            <p>Run from IntelliJ, start Docker Compose, generate a local JWT, and call <code>/api/dashboard</code>.</p>
+          </article>
+          <article class="doc-card">
+            <strong><a href="./api-and-security.html">API and Security</a></strong>
+            <p>Use Swagger UI, download OpenAPI JSON/YAML, understand JWT rules, and review fallback behavior.</p>
+          </article>
+          <article class="doc-card">
+            <strong><a href="./quality-and-troubleshooting.html">Quality and Troubleshooting</a></strong>
+            <p>Run tests, inspect coverage, generate Javadoc, understand the Pages artifact, and resolve common issues.</p>
+          </article>
+          <article class="doc-card">
+            <strong><a href="../swagger-ui/">Generated API Reference</a></strong>
+            <p>Open the CI-published Swagger UI backed by the generated OpenAPI JSON contract.</p>
+          </article>
+        </div>
+      </section>
+
+      <section class="doc-section" aria-labelledby="published-title">
+        <h2 id="published-title">Published Resources</h2>
+        <div class="actions">
+          <a class="button primary" href="../">Project Overview</a>
+          <a class="button" href="https://github.com/__REPOSITORY__">GitHub Repository</a>
+          <a class="button" href="../swagger-ui/">Swagger UI</a>
+          <a class="button" href="../api/openapi.json">OpenAPI JSON</a>
+          <a class="button" href="../api/openapi.yaml">OpenAPI YAML</a>
+          <a class="button" href="../javadoc/">Javadoc</a>
+          <a class="button" href="../coverage/">Coverage</a>
+        </div>
+      </section>
+
+      <nav class="pagination" aria-label="Guide pagination">
+        <span></span>
+        <a class="button primary" href="./getting-started.html">Next: Getting Started</a>
+      </nav>
+    </article>
+  </main>
+
+  <footer class="site-footer">
+    <div class="footer-inner">
+      User Guide for React BFF Gateway.
+    </div>
+  </footer>
+</body>
+</html>

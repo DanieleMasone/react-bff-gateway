@@ -1,0 +1,175 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light dark">
+  <meta name="description" content="Local startup, Docker Compose, JWT generation, and dashboard API calls for React BFF Gateway.">
+  <title>Getting Started - React BFF Gateway</title>
+  <link rel="stylesheet" href="../assets/styles.css">
+  <script src="../assets/theme.js" defer></script>
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to content</a>
+  <header class="site-header">
+    <nav class="nav" aria-label="Primary navigation">
+      <a class="brand" href="../" aria-label="React BFF Gateway home">
+        <span class="brand-mark" aria-hidden="true">BFF</span>
+        <span>React BFF Gateway</span>
+      </a>
+      <div class="nav-links" aria-label="Primary links">
+        <a href="../">Overview</a>
+        <a href="./" aria-current="page">User Guide</a>
+        <a href="../swagger-ui/">Swagger UI</a>
+        <a href="../javadoc/">Javadoc</a>
+        <a href="../coverage/">Coverage</a>
+      </div>
+      <div class="nav-actions">
+        <button class="theme-toggle" type="button" data-theme-toggle aria-label="Switch color theme" aria-pressed="false">
+          <span class="theme-icon" aria-hidden="true">Dark</span>
+          <span class="theme-label">Theme</span>
+        </button>
+        <details class="mobile-menu">
+          <summary>Menu</summary>
+          <div class="mobile-panel">
+            <a href="../">Overview</a>
+            <a href="./">Guide Overview</a>
+            <a href="./getting-started.html" aria-current="page">Getting Started</a>
+            <a href="./api-and-security.html">API and Security</a>
+            <a href="./quality-and-troubleshooting.html">Quality and Troubleshooting</a>
+            <a href="../swagger-ui/">Swagger UI</a>
+            <a href="../javadoc/">Javadoc</a>
+            <a href="../coverage/">Coverage</a>
+          </div>
+        </details>
+      </div>
+    </nav>
+  </header>
+
+  <main id="main" class="page-main guide-shell">
+    <aside class="guide-sidebar" aria-label="User Guide navigation">
+      <h2>User Guide</h2>
+      <nav class="guide-nav">
+        <a href="./">Overview</a>
+        <a href="./getting-started.html" aria-current="page">Getting Started</a>
+        <a href="./api-and-security.html">API and Security</a>
+        <a href="./quality-and-troubleshooting.html">Quality and Troubleshooting</a>
+      </nav>
+    </aside>
+
+    <article class="guide-content">
+      <header class="guide-header">
+        <p class="eyebrow">Getting Started</p>
+        <h1>Run the BFF and call the dashboard endpoint.</h1>
+        <p class="lede">
+          Use either IntelliJ plus mock downstream services, or Docker Compose for the complete local stack.
+        </p>
+      </header>
+
+      <section class="doc-section" aria-labelledby="intellij-title">
+        <h2 id="intellij-title">Running From IntelliJ</h2>
+        <ol>
+          <li>Import the repository as a Maven project.</li>
+          <li>Use JDK 21 for the project SDK.</li>
+          <li>Create a Spring Boot run configuration for <code>com.dani.bff.ReactBffGatewayApplication</code>.</li>
+          <li>Set the active profile to <code>local</code>.</li>
+          <li>Start the mock downstream services.</li>
+        </ol>
+        <pre class="code-block"><code>docker compose up user-service product-service</code></pre>
+        <p>Run the Spring Boot application from IntelliJ, then confirm the health endpoint is available:</p>
+        <pre class="code-block"><code>Invoke-WebRequest http://localhost:8080/actuator/health</code></pre>
+      </section>
+
+      <section class="doc-section" aria-labelledby="docker-title">
+        <h2 id="docker-title">Running With Docker Compose</h2>
+        <p>Start the complete local stack:</p>
+        <pre class="code-block"><code>docker compose up --build</code></pre>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th scope="col">Service</th>
+                <th scope="col">URL</th>
+                <th scope="col">Purpose</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>BFF</td>
+                <td><code>http://localhost:8080</code></td>
+                <td>React-facing Spring Boot gateway.</td>
+              </tr>
+              <tr>
+                <td>User service</td>
+                <td><code>http://localhost:8081</code></td>
+                <td>WireMock downstream for profile data.</td>
+              </tr>
+              <tr>
+                <td>Product service</td>
+                <td><code>http://localhost:8082</code></td>
+                <td>WireMock downstream for recommendations.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <p>Stop the stack when finished:</p>
+        <pre class="code-block"><code>docker compose down</code></pre>
+      </section>
+
+      <section class="doc-section" aria-labelledby="jwt-title">
+        <h2 id="jwt-title">Local JWT Generation</h2>
+        <p>The helper script creates an HS256 token suitable for local development:</p>
+        <pre class="code-block"><code>$token = powershell -ExecutionPolicy Bypass -File .\scripts\create-local-jwt.ps1</code></pre>
+        <p>Default claims:</p>
+        <ul>
+          <li><code>sub</code>: <code>user-123</code></li>
+          <li><code>iss</code>: <code>react-bff-gateway-local</code></li>
+          <li><code>aud</code>: <code>react-dashboard</code></li>
+          <li><code>scope</code>: <code>dashboard:read</code></li>
+          <li>TTL: 60 minutes</li>
+        </ul>
+        <p>Override common values when needed:</p>
+        <pre class="code-block"><code>$token = powershell -ExecutionPolicy Bypass -File .\scripts\create-local-jwt.ps1 -Subject user-456 -TtlMinutes 30</code></pre>
+        <div class="callout warning">
+          <strong>Development-only token flow</strong>
+          <p>Local HS256 validation is intended for development. Production-style deployments should configure <code>BFF_JWT_JWK_SET_URI</code> or <code>BFF_JWT_ISSUER_URI</code>.</p>
+        </div>
+      </section>
+
+      <section class="doc-section" aria-labelledby="api-call-title">
+        <h2 id="api-call-title">Calling <code>/api/dashboard</code></h2>
+        <p>Call the dashboard endpoint with the generated Bearer token:</p>
+        <pre class="code-block"><code>Invoke-WebRequest `
+  -Headers @{ Authorization = "Bearer $token" } `
+  http://localhost:8080/api/dashboard</code></pre>
+        <p>Example response:</p>
+        <pre class="code-block"><code>{
+  "user": {
+    "id": "user-123",
+    "displayName": "Demo User",
+    "email": "demo@example.com"
+  },
+  "recommendedProducts": [
+    {
+      "id": "prd-001",
+      "name": "Premium Account",
+      "price": 9.99
+    }
+  ]
+}</code></pre>
+      </section>
+
+      <nav class="pagination" aria-label="Guide pagination">
+        <a class="button" href="./">Previous: Overview</a>
+        <a class="button primary" href="./api-and-security.html">Next: API and Security</a>
+      </nav>
+    </article>
+  </main>
+
+  <footer class="site-footer">
+    <div class="footer-inner">
+      User Guide for React BFF Gateway.
+    </div>
+  </footer>
+</body>
+</html>

@@ -142,18 +142,13 @@ jobs:
           if-no-files-found: ignore
           retention-days: 14
 
-      - name: Prepare GitHub Pages content
-        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
-        shell: bash
-        run: |
-          set -euo pipefail
-          mkdir -p target/pages/javadoc target/pages/coverage target/pages/api target/pages/swagger-ui
-          cp -R target/site/apidocs/. target/pages/javadoc/
-          cp -R target/site/jacoco/. target/pages/coverage/
-          cp target/openapi/openapi.json target/pages/api/openapi.json
-          cp target/openapi/openapi.yaml target/pages/api/openapi.yaml
-          cp -R target/swagger-ui/. target/pages/swagger-ui/
-          sed "s#__REPOSITORY__#${GITHUB_REPOSITORY}#g" .github/pages/index.html > target/pages/index.html
+      - name: Assemble GitHub Pages content
+        shell: pwsh
+        run: ./scripts/build-pages.ps1 -Repository $env:GITHUB_REPOSITORY
+
+      - name: Validate GitHub Pages links
+        shell: pwsh
+        run: ./scripts/validate-pages-links.ps1
 
       - name: Configure GitHub Pages
         if: github.event_name == 'push' && github.ref == 'refs/heads/main'

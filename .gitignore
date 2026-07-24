@@ -16,6 +16,9 @@ coverage/
 site/jacoco/
 target/site/jacoco/
 target/jacoco.exec
+target/pages/
+target/openapi/
+target/swagger-ui/
 
 # Generated Javadoc
 docs/apidocs/

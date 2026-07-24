@@ -5,7 +5,6 @@
 ![Java](https://img.shields.io/badge/Java-21-007396?logo=openjdk)
 ![Spring Boot](https://img.shields.io/badge/Spring%20Boot-3.4.7-6DB33F?logo=springboot)
 ![OpenAPI](https://img.shields.io/badge/OpenAPI-3-6BA539?logo=openapiinitiative)
-![Coverage](https://img.shields.io/badge/Coverage-JaCoCo-informational)
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 
 Production-oriented Backend for Frontend (BFF) for a React dashboard. The BFF exposes one stable dashboard API, validates JWTs, aggregates downstream user and product services with `WebClient`, applies Resilience4j fallbacks, and publishes generated OpenAPI, Javadoc, and JaCoCo documentation through GitHub Pages.
@@ -13,7 +12,7 @@ Production-oriented Backend for Frontend (BFF) for a React dashboard. The BFF ex
 ## Live Documentation
 
 - [Portfolio landing page](https://danielemasone.github.io/react-bff-gateway/)
-- [User Guide](docs/user-guide.md)
+- [User Guide](https://danielemasone.github.io/react-bff-gateway/user-guide/)
 - [Javadoc](https://danielemasone.github.io/react-bff-gateway/javadoc/)
 - [JaCoCo coverage](https://danielemasone.github.io/react-bff-gateway/coverage/)
 - [Published Swagger UI](https://danielemasone.github.io/react-bff-gateway/swagger-ui/)
@@ -114,9 +113,12 @@ src/main/java/com/dani/bff
 `-- service   dashboard aggregation orchestration
 
 .github/pages/index.html      single maintained GitHub Pages landing page template
+.github/pages/user-guide      HTML source for the Pages-published User Guide
+.github/pages/assets          shared CSS and JavaScript for Pages documentation
 .github/workflows/ci.yml      CI, artifact publishing, and Pages deployment
-docs/user-guide.md            operational guide for running and using the project
 docker/wiremock               local mock user and product services
+scripts/build-pages.ps1       deterministic GitHub Pages artifact assembly
+scripts/validate-pages-links.ps1 lightweight internal Pages link validation
 scripts/create-local-jwt.ps1  local HS256 JWT helper
 ```
 
@@ -147,7 +149,7 @@ Open local Swagger UI when the app runs with the `local` profile:
 http://localhost:8080/swagger-ui.html
 ```
 
-Detailed IntelliJ, Docker, JWT, Swagger, OpenAPI, and troubleshooting instructions are in the [User Guide](docs/user-guide.md).
+Detailed IntelliJ, Docker, JWT, Swagger, OpenAPI, and troubleshooting instructions are in the [User Guide](https://danielemasone.github.io/react-bff-gateway/user-guide/).
 
 ## Testing, Coverage, and Javadoc
 
@@ -170,10 +172,16 @@ Javadoc is written to `target/site/apidocs`. Generated coverage, Javadoc, OpenAP
 GitHub Pages is generated during CI from:
 
 - the single maintained landing page template
+- the HTML User Guide source under `.github/pages/user-guide/`
+- shared Pages CSS and JavaScript under `.github/pages/assets/`
 - generated Javadoc
 - generated JaCoCo coverage
 - generated OpenAPI JSON/YAML
 - generated static Swagger UI assets assembled from Springdoc
+
+The User Guide is maintained as direct HTML source instead of Markdown plus conversion. The guide is small, and direct HTML provides reliable accessibility and responsive layout control without introducing a documentation framework or frontend build chain.
+
+`scripts/build-pages.ps1` assembles all Pages content under `target/pages`. `scripts/validate-pages-links.ps1` validates required routes and internal links before deployment.
 
 No generated reports or Pages output are committed.
 

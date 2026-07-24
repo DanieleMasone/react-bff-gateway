@@ -124,6 +124,8 @@ The workflow must:
 - run `mvn verify` as the main Maven lifecycle check for validation, tests, packaging, JaCoCo reports, and coverage gates
 - generate Javadoc after `verify`
 - export OpenAPI JSON/YAML from the running BFF
+- assemble GitHub Pages content with `scripts/build-pages.ps1`
+- validate Pages links with `scripts/validate-pages-links.ps1`
 - upload test reports on failure
 - upload JaCoCo, Javadoc, and OpenAPI artifacts
 - deploy GitHub Pages only from successful pushes to `main`
@@ -139,20 +141,25 @@ Before changing Pages or Actions behavior, check current official GitHub documen
 
 The only manually maintained landing page is `.github/pages/index.html`.
 
-CI copies generated Javadoc to `target/pages/javadoc`, generated JaCoCo coverage to `target/pages/coverage`, generated OpenAPI specs to `target/pages/api`, generated Swagger UI output to `target/pages/swagger-ui`, substitutes the repository name into the landing page template, uploads the Pages artifact, and deploys with GitHub Pages.
+CI runs `scripts/build-pages.ps1` to assemble generated Javadoc under `target/pages/javadoc`, generated JaCoCo coverage under `target/pages/coverage`, generated OpenAPI specs under `target/pages/api`, generated Swagger UI output under `target/pages/swagger-ui`, shared assets under `target/pages/assets`, and the HTML User Guide under `target/pages/user-guide`. CI then runs `scripts/validate-pages-links.ps1`, uploads the Pages artifact, and deploys with GitHub Pages.
 
-Keep the Pages template accessible, responsive, lightweight, and useful as portfolio documentation. Avoid frontend build chains and duplicated manually maintained documentation pages.
+Keep the Pages source accessible, responsive, lightweight, and useful as portfolio documentation. Avoid frontend build chains and duplicated manually maintained documentation pages.
 
 ## Documentation Policy
 
 Keep the documentation set intentionally small:
 
 - `README.md` is the GitHub entry point and portfolio overview.
-- `docs/user-guide.md` contains operational instructions for local running, Docker, JWTs, Swagger UI, OpenAPI, generated reports, and troubleshooting.
+- `.github/pages/user-guide/` contains direct HTML source for the Pages-published User Guide.
+- `.github/pages/assets/` contains shared CSS and JavaScript used by the landing page and User Guide.
 - `AGENTS.md` guides future AI and human contributors.
-- `.github/pages/index.html` is the only manually maintained GitHub Pages HTML file.
+- `.github/pages/index.html` is the only manually maintained GitHub Pages landing page.
 
-Avoid documentation sprawl. Do not add MkDocs, Docusaurus, static-site generators, duplicate guides, or additional manually maintained Pages HTML files without a clear technical reason. Keep README concise, keep the User Guide practical, and keep the landing page focused on portfolio navigation and generated documentation links.
+The User Guide is maintained as HTML source rather than Markdown plus conversion. The guide is small, and direct HTML keeps responsive layout, accessibility, navigation state, and dark mode predictable without adding a documentation generator.
+
+Operational details belong in the User Guide, not the README. Keep README concise, keep the User Guide practical, and keep the landing page focused on portfolio navigation and generated documentation links.
+
+Avoid documentation sprawl. Do not add MkDocs, Docusaurus, Hugo, Jekyll, Node-based documentation pipelines, duplicate guides, or additional documentation frameworks without a clear technical reason. Keep README, User Guide, landing page, and implementation aligned.
 
 ## Docker Expectations
 
@@ -192,6 +199,7 @@ Do not commit:
 - Javadoc output
 - generated OpenAPI specs
 - generated Swagger UI output
+- generated Pages staging output
 - generated mapper implementations
 - logs
 - IDE files
@@ -219,11 +227,12 @@ docker compose down
 Also check:
 
 - GitHub Actions YAML remains valid.
-- Pages artifact generation still includes `index.html`, `javadoc/`, and `coverage/`.
+- Pages artifact generation still includes `index.html`, `user-guide/`, `assets/`, `javadoc/`, and `coverage/`.
 - Pages artifact generation includes `api/openapi.json`, `api/openapi.yaml`, and `swagger-ui/index.html`.
+- Pages link validation passes.
 - Swagger UI works locally at `/swagger-ui.html` when documentation is enabled.
 - README matches real behavior.
-- The landing page matches the implementation and remains the only manually maintained Pages HTML file.
+- The landing page matches the implementation and remains the only manually maintained Pages landing page.
 - Generated files are ignored.
 
 ## Things To Avoid
