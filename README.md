@@ -221,3 +221,9 @@ The project is intentionally one deployable gateway. Splitting it into more serv
 - Docker-local development with mock downstream services
 - Meaningful automated tests and architecture rules
 - CI-generated coverage, Javadoc, OpenAPI specs, and GitHub Pages documentation
+
+## License
+
+Released under the MIT License. See [LICENSE](LICENSE).
+
+Copyright (c) 2026 Daniele Masone.
