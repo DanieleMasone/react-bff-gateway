@@ -57,6 +57,48 @@ function Copy-RequiredFile {
     Copy-Item -LiteralPath $Source -Destination $Destination -Force
 }
 
+function Write-CoverageBadge {
+    param(
+        [string]$JaCoCoCsv,
+        [string]$Destination
+    )
+
+    Assert-PathExists -Path $JaCoCoCsv -Description "JaCoCo CSV report"
+    $rows = Import-Csv -LiteralPath $JaCoCoCsv
+    $coveredLines = [long](($rows | Measure-Object -Property LINE_COVERED -Sum).Sum)
+    $missedLines = [long](($rows | Measure-Object -Property LINE_MISSED -Sum).Sum)
+    $totalLines = $coveredLines + $missedLines
+
+    if ($totalLines -le 0) {
+        throw "JaCoCo CSV report does not contain line coverage data."
+    }
+
+    $coverage = [math]::Round((100 * $coveredLines / $totalLines), 2, [MidpointRounding]::AwayFromZero)
+    $color = if ($coverage -ge 90) {
+        "brightgreen"
+    } elseif ($coverage -ge 80) {
+        "green"
+    } elseif ($coverage -ge 70) {
+        "yellowgreen"
+    } elseif ($coverage -ge 60) {
+        "yellow"
+    } elseif ($coverage -ge 50) {
+        "orange"
+    } else {
+        "red"
+    }
+
+    $badge = [ordered]@{
+        schemaVersion = 1
+        label = "coverage"
+        message = $coverage.ToString("0.##", [System.Globalization.CultureInfo]::InvariantCulture) + "%"
+        color = $color
+    }
+
+    New-Item -ItemType Directory -Force -Path (Split-Path $Destination -Parent) | Out-Null
+    $badge | ConvertTo-Json -Compress | Set-Content -Encoding UTF8 -Path $Destination
+}
+
 Assert-PathExists -Path $pagesSource -Description "Pages source directory"
 Ensure-CleanDirectory -Path $target
 
@@ -83,6 +125,10 @@ Copy-RequiredDirectory `
     -Source (Join-Path $repoRoot "target/site/jacoco") `
     -Destination (Join-Path $target "coverage") `
     -Description "Generated JaCoCo coverage report"
+
+Write-CoverageBadge `
+    -JaCoCoCsv (Join-Path $repoRoot "target/site/jacoco/jacoco.csv") `
+    -Destination (Join-Path $target "badges/coverage.json")
 
 Copy-RequiredFile `
     -Source (Join-Path $repoRoot "target/openapi/openapi.json") `

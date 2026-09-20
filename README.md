@@ -1,11 +1,9 @@
 # React BFF Gateway
 
-![CI](https://github.com/danielemasone/react-bff-gateway/actions/workflows/ci.yml/badge.svg)
-[![GitHub Pages](https://img.shields.io/badge/GitHub%20Pages-online-121013?logo=github)](https://danielemasone.github.io/react-bff-gateway/)
-![Java](https://img.shields.io/badge/Java-21-007396?logo=openjdk)
-![Spring Boot](https://img.shields.io/badge/Spring%20Boot-3.4.7-6DB33F?logo=springboot)
-![OpenAPI](https://img.shields.io/badge/OpenAPI-3-6BA539?logo=openapiinitiative)
-[![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+[![CI](https://github.com/danielemasone/react-bff-gateway/actions/workflows/ci.yml/badge.svg?branch=main&event=push)](https://github.com/danielemasone/react-bff-gateway/actions/workflows/ci.yml)
+[![Coverage](https://img.shields.io/endpoint?url=https%3A%2F%2Fdanielemasone.github.io%2Freact-bff-gateway%2Fbadges%2Fcoverage.json)](https://danielemasone.github.io/react-bff-gateway/coverage/)
+[![Pages](https://img.shields.io/website?url=https%3A%2F%2Fdanielemasone.github.io%2Freact-bff-gateway%2F&up_message=online&down_message=offline&label=pages)](https://danielemasone.github.io/react-bff-gateway/)
+[![License](https://img.shields.io/github/license/danielemasone/react-bff-gateway?label=license)](LICENSE)
 
 Production-oriented Backend for Frontend (BFF) for a React dashboard. The BFF exposes one stable dashboard API, validates JWTs, aggregates downstream user and product services with `WebClient`, applies Resilience4j fallbacks, and publishes generated OpenAPI, Javadoc, and JaCoCo documentation through GitHub Pages.
 
