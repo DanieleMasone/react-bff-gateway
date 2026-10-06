@@ -1,8 +1,6 @@
 package com.dani.bff.config;
 
 import com.dani.bff.error.ApiError;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.nio.charset.StandardCharsets;
 import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
@@ -29,6 +27,8 @@ import org.springframework.security.web.server.authorization.ServerAccessDeniedH
 import org.springframework.util.StringUtils;
 import org.springframework.web.server.ServerWebExchange;
 import reactor.core.publisher.Mono;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * Configures JWT resource-server security and JSON security error responses.
@@ -151,7 +151,7 @@ public class SecurityConfig {
         try {
             byte[] bytes = objectMapper.writeValueAsBytes(error);
             return response.writeWith(Mono.just(response.bufferFactory().wrap(bytes)));
-        } catch (JsonProcessingException ex) {
+        } catch (JacksonException ex) {
             return response.setComplete();
         }
     }

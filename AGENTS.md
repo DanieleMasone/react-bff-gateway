@@ -57,7 +57,7 @@ Do not split the project into fake microservices. The downstream user and produc
 
 ## Testing Expectations
 
-Use meaningful tests only. Current test tools are JUnit 5, Spring Boot Test, WebTestClient, Reactor Test, MockWebServer, Spring Security Test, and ArchUnit.
+Use meaningful tests only. Current test tools are JUnit Jupiter, Spring Boot Test, WebTestClient, Reactor Test, MockWebServer, Spring Security Test, and ArchUnit. Tests using `mockJwt()` must use a context-bound WebTestClient (`MOCK` web environment); live-server tests use real HTTP and signed tokens instead.
 
 Tests should cover:
 
@@ -177,6 +177,8 @@ The Docker setup must not require paid or external services.
 ## Dependency Rules
 
 Keep dependencies minimal and justified by actual behavior.
+
+The framework baseline is Spring Boot 4 with Jackson 3, Springdoc 3, and `resilience4j-spring-boot4`. Use the dedicated WebClient, WebFlux test, and Security test starters for their respective auto-configuration. Let the Boot BOM manage Spring, Security, Reactor, Jackson, Netty, and Micrometer; do not override them independently without a documented reason. Keep Java 21 aligned across Maven, CI, and Docker. Maven 3.9 and MockWebServer 4 are deliberate stability choices. Version audits are manual and one-time: do not add Dependabot, Renovate, scheduled version checks, or automatic update mechanisms.
 
 Allowed dependency areas:
 

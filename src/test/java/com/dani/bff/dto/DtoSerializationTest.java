@@ -2,12 +2,12 @@ package com.dani.bff.dto;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.math.BigDecimal;
 import java.util.List;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.json.JsonTest;
+import tools.jackson.databind.ObjectMapper;
 
 @JsonTest
 class DtoSerializationTest {

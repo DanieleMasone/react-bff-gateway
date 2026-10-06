@@ -89,11 +89,11 @@ Example response:
 ## Tech Stack
 
 - Java 21 and Maven Wrapper
-- Spring Boot 3.4.7, WebFlux, WebClient, Actuator
+- Spring Boot 4.1.1, WebFlux, WebClient, Actuator
 - Spring Security OAuth2 Resource Server / JWT
 - Springdoc OpenAPI 3 for WebFlux and Swagger UI
 - Resilience4j circuit breakers
-- JUnit 5, Spring Boot Test, WebTestClient, Reactor Test, MockWebServer, ArchUnit
+- JUnit Jupiter, Spring Boot Test, WebTestClient, Reactor Test, MockWebServer, ArchUnit
 - JaCoCo coverage reports and Maven coverage gates
 - Javadoc generated under Java 21
 - Docker Compose with WireMock downstream services
@@ -204,6 +204,10 @@ The API contract is generated from the running application so Swagger UI, CI art
 ### Why No MapStruct
 
 The current downstream-to-frontend mappings are small and explicit. Adding generated mapper code would add noise without improving maintainability.
+
+### Version Baseline
+
+Java 21 remains the compiler, CI, and Docker baseline. Spring Boot manages Spring Framework, Spring Security, Reactor, Jackson, Netty, and Micrometer versions. Boot 4 uses Jackson 3, dedicated WebClient and test starters, Springdoc 3, and the Resilience4j Boot 4 integration. Maven stays on the mature 3.9 line; MockWebServer 4 is retained to avoid an unrelated test-API migration. Dependency updates are reviewed manually, with no recurring update automation.
 
 ### Why One Deployable
 
