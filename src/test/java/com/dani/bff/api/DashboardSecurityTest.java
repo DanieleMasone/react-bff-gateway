@@ -2,7 +2,18 @@ package com.dani.bff.api;
 
 import static org.springframework.security.test.web.reactive.server.SecurityMockServerConfigurers.mockJwt;
 
+import com.nimbusds.jose.JWSAlgorithm;
+import com.nimbusds.jose.JWSHeader;
+import com.nimbusds.jose.crypto.MACSigner;
+import com.nimbusds.jwt.JWTClaimsSet;
+import com.nimbusds.jwt.SignedJWT;
+import java.nio.charset.StandardCharsets;
+import java.time.Instant;
+import java.util.Date;
+import java.util.stream.Stream;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.webtestclient.autoconfigure.AutoConfigureWebTestClient;
@@ -17,6 +28,47 @@ class DashboardSecurityTest {
 
     @Autowired
     private WebTestClient webTestClient;
+
+    @ParameterizedTest
+    @MethodSource("invalidTokens")
+    void invalidJwtReturnsStructuredErrorAndBearerChallenge(String token) {
+        webTestClient.get()
+                .uri("/api/dashboard")
+                .header(HttpHeaders.AUTHORIZATION, "Bearer " + token)
+                .exchange()
+                .expectStatus().isUnauthorized()
+                .expectHeader().valueMatches(HttpHeaders.WWW_AUTHENTICATE, "Bearer.*invalid_token.*")
+                .expectHeader().contentTypeCompatibleWith("application/json")
+                .expectBody()
+                .jsonPath("$.status").isEqualTo(401)
+                .jsonPath("$.error").isEqualTo("Unauthorized")
+                .jsonPath("$.message").isEqualTo("Authentication is required")
+                .jsonPath("$.path").isEqualTo("/api/dashboard")
+                .jsonPath("$.timestamp").exists();
+    }
+
+    private static Stream<String> invalidTokens() throws Exception {
+        String secret = "test-development-secret-change-me-at-least-32-bytes";
+        Instant now = Instant.now();
+        return Stream.of(
+                "not-a-jwt",
+                signedToken("wrong-issuer", "react-dashboard", now.plusSeconds(300), secret),
+                signedToken("react-bff-gateway-test", "wrong-audience", now.plusSeconds(300), secret),
+                signedToken("react-bff-gateway-test", "react-dashboard", now.minusSeconds(120), secret),
+                signedToken("react-bff-gateway-test", "react-dashboard", now.plusSeconds(300),
+                        "different-signing-secret-at-least-32-bytes"));
+    }
+
+    private static String signedToken(String issuer, String audience, Instant expiresAt, String secret) throws Exception {
+        SignedJWT jwt = new SignedJWT(new JWSHeader(JWSAlgorithm.HS256), new JWTClaimsSet.Builder()
+                .subject("user-123")
+                .issuer(issuer)
+                .audience(audience)
+                .expirationTime(Date.from(expiresAt))
+                .build());
+        jwt.sign(new MACSigner(secret.getBytes(StandardCharsets.UTF_8)));
+        return jwt.serialize();
+    }
 
     @Test
     void dashboardRequiresAuthentication() {

@@ -101,6 +101,7 @@ Invoke-WebRequest -UseBasicParsing http://localhost:8080/v3/api-docs.yaml -OutFi
           <li><code>/actuator/health</code> and <code>/actuator/health/**</code> are public.</li>
           <li>All other routes are denied by default.</li>
           <li>Authentication and access-denied failures return structured JSON <code>ApiError</code> payloads.</li>
+          <li>Missing or invalid JWTs return a Bearer challenge and a stable error body without exposing token-validation details.</li>
           <li>OpenAPI JSON/YAML and Swagger UI are disabled by default and enabled intentionally in the <code>local</code> profile.</li>
         </ul>
         <p>JWT decoder precedence is JWK set URI, then issuer URI, then local HMAC secret.</p>

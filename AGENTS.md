@@ -43,6 +43,7 @@ Do not split the project into fake microservices. The downstream user and produc
 - All other routes must be denied by default.
 - OpenAPI JSON/YAML and Swagger UI must stay disabled by default and enabled intentionally for local/docs generation.
 - Authentication and authorization failures must return structured JSON `ApiError` bodies.
+- Register JSON security handlers on both exception handling and the OAuth2 resource server. Preserve Bearer challenges and test real malformed, expired, incorrectly signed, wrong-issuer, and wrong-audience tokens through the filter chain.
 - JWT decoder precedence is JWK set URI, issuer URI, then local HMAC secret.
 - The base profile must not embed a signing secret; development defaults belong only in the `local` profile.
 - Tests must not require a real identity provider.

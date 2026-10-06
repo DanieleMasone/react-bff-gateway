@@ -7,6 +7,7 @@ import javax.crypto.spec.SecretKeySpec;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.security.config.Customizer;
@@ -14,6 +15,7 @@ import org.springframework.security.config.annotation.web.reactive.EnableWebFlux
 import org.springframework.security.config.web.server.ServerHttpSecurity;
 import org.springframework.security.oauth2.core.DelegatingOAuth2TokenValidator;
 import org.springframework.security.oauth2.core.OAuth2Error;
+import org.springframework.security.oauth2.core.OAuth2AuthenticationException;
 import org.springframework.security.oauth2.core.OAuth2TokenValidator;
 import org.springframework.security.oauth2.core.OAuth2TokenValidatorResult;
 import org.springframework.security.oauth2.jose.jws.MacAlgorithm;
@@ -21,6 +23,7 @@ import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.oauth2.jwt.JwtValidators;
 import org.springframework.security.oauth2.jwt.NimbusReactiveJwtDecoder;
 import org.springframework.security.oauth2.jwt.ReactiveJwtDecoder;
+import org.springframework.security.oauth2.server.resource.BearerTokenError;
 import org.springframework.security.web.server.SecurityWebFilterChain;
 import org.springframework.security.web.server.ServerAuthenticationEntryPoint;
 import org.springframework.security.web.server.authorization.ServerAccessDeniedHandler;
@@ -68,7 +71,10 @@ public class SecurityConfig {
                 .exceptionHandling(errors -> errors
                         .authenticationEntryPoint(authenticationEntryPoint(objectMapper))
                         .accessDeniedHandler(accessDeniedHandler(objectMapper)))
-                .oauth2ResourceServer(oauth2 -> oauth2.jwt(Customizer.withDefaults()))
+                .oauth2ResourceServer(oauth2 -> oauth2
+                        .authenticationEntryPoint(authenticationEntryPoint(objectMapper))
+                        .accessDeniedHandler(accessDeniedHandler(objectMapper))
+                        .jwt(Customizer.withDefaults()))
                 .build();
     }
 
@@ -128,7 +134,22 @@ public class SecurityConfig {
     }
 
     private static ServerAuthenticationEntryPoint authenticationEntryPoint(ObjectMapper objectMapper) {
-        return (exchange, ex) -> writeJsonError(exchange, objectMapper, HttpStatus.UNAUTHORIZED, "Authentication is required");
+        return (exchange, ex) -> {
+            HttpStatus status = HttpStatus.UNAUTHORIZED;
+            String challenge = "Bearer";
+            if (ex instanceof OAuth2AuthenticationException authenticationException) {
+                OAuth2Error error = authenticationException.getError();
+                if (error instanceof BearerTokenError bearerTokenError) {
+                    status = bearerTokenError.getHttpStatus();
+                }
+                // Keep the protocol error without exposing decoder or validation details.
+                challenge = "invalid_request".equals(error.getErrorCode())
+                        ? "Bearer error=\"invalid_request\""
+                        : "Bearer error=\"invalid_token\"";
+            }
+            exchange.getResponse().getHeaders().set(HttpHeaders.WWW_AUTHENTICATE, challenge);
+            return writeJsonError(exchange, objectMapper, status, "Authentication is required");
+        };
     }
 
     private static ServerAccessDeniedHandler accessDeniedHandler(ObjectMapper objectMapper) {

@@ -76,6 +76,7 @@ Example response:
 - `/actuator/health` and `/actuator/health/**` are public.
 - Every other route is denied by default.
 - Authentication and access-denied failures return structured JSON `ApiError` payloads.
+- Missing or invalid JWTs return a Bearer challenge and a stable error body without token-validation details.
 - The base profile contains no signing secret. The `local` profile supplies a documented development-only HS256 secret for the included token helper; production-style deployments should use `BFF_JWT_JWK_SET_URI` or `BFF_JWT_ISSUER_URI`.
 - OpenAPI JSON/YAML and Swagger UI are disabled by default and enabled intentionally in the `local` profile.
 

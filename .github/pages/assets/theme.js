@@ -45,6 +45,20 @@
     });
   });
 
+  document.querySelectorAll(".mobile-menu a").forEach(function (link) {
+    link.addEventListener("click", function () {
+      var menu = link.closest("details");
+      menu.open = false;
+      if (link.hash && link.pathname === window.location.pathname) {
+        var target = document.getElementById(link.hash.slice(1));
+        if (target) {
+          target.setAttribute("tabindex", "-1");
+          target.focus({ preventScroll: true });
+        }
+      }
+    });
+  });
+
   mediaQuery.addEventListener("change", function () {
     if (!readStoredTheme()) {
       applyTheme(preferredTheme());

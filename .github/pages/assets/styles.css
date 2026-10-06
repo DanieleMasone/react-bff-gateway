@@ -359,6 +359,7 @@ p {
 
 .section {
   margin-top: 72px;
+  scroll-margin-top: 96px;
 }
 
 .section-heading {
